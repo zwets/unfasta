@@ -1,0 +1,64 @@
+#!/bin/sh
+#
+# uf - Convert FASTA to unfasta format
+# Marco van Zwetselaar <io@zwets.it>
+# 2016-01-18
+# 
+# Part of blast-galley (http://io.zwets.it/blast-galley).
+
+# The width to use for the reverse operation
+FASTA_LINE_WIDTH=80
+
+# Function to exit this script with an error message on stderr
+err_exit() {
+	echo "$(basename "$0"): $*" >&2
+	exit 1
+}
+
+# Function to show usage information and exit
+usage_exit() {
+	echo
+	echo "Usage: $(basename $0) [OPTIONS] [FILE] ..."
+	echo
+	echo "  Convert FILES to unfasta format and write to standard output.  With no FILE"
+	echo "  or when FILE is '-', read standard input."
+	echo
+	echo "  Unfasta is FASTA without those pesky newlines mucking up the sequences."
+	echo "  Hence, every unfasta file has an even number of lines, with every odd line"
+	echo "  having a header and every even line containing a sequence."
+	echo
+	echo "  Technically every unfasta file is also a FASTA file: the FASTA line length"
+	echo "  limit of 80 or 120 is a recommendation (and should be abolished)."
+	echo 
+	exit ${1:-1}
+}
+
+# Parse options
+
+unset REVERT
+
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
+	case $1 in
+	-r|--revert)
+		REVERT="true"
+		;;
+	-h|--help)
+		usage_exit 0
+		;;
+	*) usage_exit
+		;;
+	esac
+	shift
+done
+
+if [ -n "$REVERT" ]; then
+	awk -v WIDTH=$FASTA_LINE_WIDTH '
+	/^>/ { print }
+	/^[^>]/ { for (i=1;i<=length();i+=WIDTH) { print substr($0,i,WIDTH); } }' "$@"
+else
+	awk 'BEGIN { ORS="" }
+	/^>/    { if (NR!=1) print "\n"; print $0 "\n" }
+	/^[^>]/ { print gensub(/[[:space:]]/,"","g") }
+	END { print "\n" }' "$@"
+fi
+
