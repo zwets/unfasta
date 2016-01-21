@@ -2,6 +2,10 @@
 
 _Command-line pipes and filters for genomic sequence data._
 
+## Contents
+*
+{: toc}
+
 ## Introduction
 
 [Unfasta](http://io.zwets.it/unfasta) is a suite of command-line utilities for working with sequence data.
@@ -22,28 +26,33 @@ In that pipeline,
 * `tr -dc GC` drops from its input all characters except `G` and `C`;
 * `wc -c` counts the number of characters it reads and writes this to standard output.
 
-Pipelines are a simple and powerful way to process large streams of data.  The FASTA format however is the party pooper.  By allowing (recommending even) sequence data to be formatted in lines of 80 to 120 characters, even the seemingly obvious `cat file.fa | fgrep -q 'GAATCATCTTTA'` fails with a false negative in 10-15% of cases (at query length 12, more often when longer).  Unfasta solves this problem by converting FASTA to unfasta (more [below](#the-unfasta-format)).
+Pipelines are a simple and powerful way to process large streams of data.  The FASTA format is the party pooper.  By allowing sequence data to span multiple lines, FASTA defies processing using the standard utilities.  Even the seemingly obvious `fgrep -q 'GAATCATCTTTA' file.fa` fails,  yielding a false negative in 10-15% of cases (at query length 12, worse when longer).  Unfasta came about from frustration over this missed opportunity.  It solves the problem quite simply by converting FASTA to "unfasta", FASTA without the pesky line breaks.
 
-In principle, having `uf` and composing it with `sed`, `tr`, `wc`, etc. would beThe standard GNU Unix utilities could be sufficient, 
+Unfasta isn't intended as the be-all and end-all of genomic sequence processing.  It won't work for everyone.  It does for me because I usually work in bash and have for twenty years been using the Unix/GNU command-line tools to do "complex things in a simple way".  Over that period I have written software in at least a dozen 'proper' programming languages, but when it comes to string processing nothing beats piping together a quick one-liner in bash.  I put unfasta on the web because the law of large numbers dictates that there will be others like me who could benefit from it.
 
-Unfasta won't work for everyone.  For those who grew up with `sh` and the likes of `grep`, `sed`, and `awk`, unfasta will be second nature.  For those used to looking at the world through a window while holding a mouse: welcome outside!
+If your natural preference is to work in a graphical user environment, then unfasta may be the occasion to get out of your comfort zone and discover the beauty and power that lies outside.
 
 
 ## Design principles
 
 ### The `unfasta` file format
 
-The `unfasta` file format is FASTA with no line breaks in the sequence data.  So, an unfasta file could look like this:
+The `unfasta` file format is FASTA with no line breaks in the sequence data.  For example:
 
     >id1 Sequence title 1
-    CGCACTGTGGCCCCCGAATCTATCTTTACGGC... indefinite length sequence containing any character except new line
+    CGCACTGTGGCCCCCGAATCTATCTTTACGGC... (indefinite length sequence terminated by newline) 
     >id2 Sequence title 2
     SEQUENCE DATA ...
     ...
 
-As in FASTA, there can be an arbitrary number of sequences of arbitrary length.  Contrary to FASTA, sequences are never broken across lines.  This implies that every odd-numbered line starts with `>` and is a comment, and every even-numbered line contains sequence data.
+As in FASTA, there can be an arbitrary number of sequences of arbitrary length.  Contrary to FASTA, the sequence data cannot be broken across lines.  Therefore every sequence is serialised in exactly two lines.  Every odd-numbered line starts with `>` and is a header line, and every even-numbered line is a sequence line.
 
 The `uf` command (filter) converts a stream of FASTA to a stream of unfasta.  It can also do the reverse, but see section [unfasta *is* FASTA](#unfasta-is-fasta).
+
+The header line must start with '>', immediately followed by a (locally unique) sequence identifier. 
+
+The sequence line can contain any character except newline (which terminate it).  However to be useful it should contain only characters defined by IUPAC here.  @@@HERE@@@  however to make sense.   except 
+
 
 TODO
 * [ ] extend `uf` to convert also EMBL format data.  
@@ -166,8 +175,38 @@ Infinite sequences are not relevant to unfasta.  Unfasta is a file format, and n
 
 ### Glossary
 
+bare sequence, raw sequence
+: sequence data for a single sequence without the associated header
+
+defline
+: Abbreviation for "definition line", NCBI synonym for the header line.
+
+header
+: Tuple of a sequence identifier and an optional sequence title.  Serialised as a header line.  Associated with sequence data.
+
+header line
+: The line preceding one or more lines of sequence data in FASTA (and hence in unfasta).  It must start with `>` immediately followed by the sequence identifier.  Whitespace terminates the identifier.  Optional text following the whitespace is called the sequence title.
+
 filter
-: a processing component in a pipeline; it reads from standard input and writes to standard output
+: A processing component in a pipeline which is both a sink and a source.
+
+pipe
+: A channel connecting a source with a sink.
+
+sequence
+: Tuple of a bare sequence and its header.  Serialised in unfasta as a sequence record.  Also used as short for sequence record.  Also used as short for bare sequence.
+
+sequence record
+: The serialised form of a sequence in an unfasta file, being a header line followed by a sequence line.
+
+sequence line
+: The line containing the sequence data for a single sequence in an unfasta format file.  Must be preceded by its associated header line.  Avoid this term for FASTA as it has multiple lines containing data for a single sequence.
+
+sink
+: A component in a pipeline which consumes data from its standard input.  Every filter is a sink.  Not every sink is a filter.
+
+source
+: A component in a pipeline which writes data to its standard output.  Every filter is a source.  Not every source is a filter.
 
 ### License
 
