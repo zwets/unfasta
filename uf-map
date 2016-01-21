@@ -1,0 +1,56 @@
+#!/bin/sh
+#
+# uf-map
+# Marco van Zwetselaar <io@zwets.it>
+# 2016-01-18
+# 
+# Apply an operation on all sequences in an unfasta file.
+#
+
+# Function to exit this script with an error message on stderr
+err_exit() {
+	echo "$(basename "$0"): $*" >&2
+	exit 1
+}
+
+# Function to show usage information and exit
+usage_exit() {
+	echo
+	echo "Usage: $(basename $0) [OPTIONS] OPERATION [FILE] ..."
+	echo
+	echo "  When no FILE is present or FILE is '-', read from standard input."
+	echo
+	echo "  For every sequence in each unfasta FILE, copy its header line to standard"
+	echo "  output, then feed its sequence data line to OPERATION's standard input,"
+	echo "  then copy OPERATION's output to standard output."
+	echo 
+	echo "  Note that OPERATION is started once, not once for every sequence."
+	echo "  It must process every line of sequence data which it sequentially reads"
+	echo "  from standard input."
+	echo 
+	exit ${1:-1}
+}
+
+# Parse options
+
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
+	case $1 in
+	-h|--help)
+		usage_exit 0
+		;;
+	*) usage_exit
+		;;
+	esac
+	shift
+done
+
+# Parse arguments
+
+[ $# -ge 1 ] || usage_exit
+OPERATION="$1"
+shift
+
+# AWK it
+
+awk "NR%2==1 { print }; NR%2==0 { print | \"$OPERATION\" }"
+

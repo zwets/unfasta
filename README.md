@@ -17,10 +17,10 @@ uf file.fa | sed -n 2~2p | tr -dc 'GC' | wc -c
 
 In that pipeline,
 
-* `uf` reads a FASTA file and outputs it in 'unfasta' format (explained [below](#the-unfasta-file-format), but essentially just FASTA without line breaks in the sequence data)
-* `sed -n 2~2p` filters every second line from its input, writing to standard output only the even-numbered lines, which have the sequence data
-* `tr -dc GC` drops from its input all characters except `G` and `C`
-* `wc -c` counts the number of characters it reads and writes this to standard output
+* `uf` reads a FASTA file and outputs it in 'unfasta' format (explained [below](#the-unfasta-file-format), but essentially just FASTA without line breaks in the sequence data);
+* `sed -n 2~2p` filters every second line from its input, writing to standard output only the even-numbered lines, which have the sequence data;
+* `tr -dc GC` drops from its input all characters except `G` and `C`;
+* `wc -c` counts the number of characters it reads and writes this to standard output.
 
 Pipelines are a simple and powerful way to process large streams of data.  The FASTA format however is the party pooper.  By allowing (recommending even) sequence data to be formatted in lines of 80 to 120 characters, even the seemingly obvious `cat file.fa | fgrep -q 'GAATCATCTTTA'` fails with a false negative in 10-15% of cases (at query length 12, more often when longer).  Unfasta solves this problem by converting FASTA to unfasta (more [below](#the-unfasta-format)).
 
@@ -100,9 +100,9 @@ $ fgrep -q 'ACGTATAGCGGC' && echo "Yes" || echo "No"
 
 #### Unfasta *is* FASTA
 
-Technically, every unfasta file is a also a FASTA file.  To the extent that there is a formal specification for FASTA, this specification does not *mandate* a maximum line length.  The 80 and 120 character limits are *recommendations*.  My favourite interoperability adage _"be strict in what you send, be lenient in what you accept"_ then implies that software which consumes FASTA must tolerate indefinite line lengths, while software that produces FASTA must write either 80 or 120 character lines.
+Technically, every unfasta file is a also a FASTA file.  There is no formal specification of the FASTA format, but none of the *de facto* specifications (see the [links below](#fasta-specification)) **mandate** a maximum line length.  Several **recommend** an 80 or 120 character limit.  My favourite interoperability adage _"be strict in what you send, lenient in what you accept"_ then implies that software which consumes FASTA must tolerate indefinite line lengths, while software that produces FASTA must write 80 character lines.
 
-As an experiment, I will violate the first half of my adage until I find a tool which breaks on long lines, and I encourage others to do the same.  I will post my findings here.
+The `uf` tool has a --revert option which does precisely this.  But since the character limit recommendation was set [over 30 years ago](https://en.wikipedia.org/wiki/FASTA)!), technological progress has obliterated its reasons for existence, and I fail to see why we should continue to stick with them.  And of course, any FASTA consumer which fails to read longer lines _does_ violate the spec -- the length limit is only a *recommendation*, right?)  In short, don't revert unfasta back to FASTA and let's see if anything breaks.
 
 
 ### Pipes and Filters architecture
@@ -153,6 +153,16 @@ There are two reasons to support zero-length sequences.  Firstly, a zero-length 
 Infinite sequences are not relevant to unfasta.  Unfasta is a file format, and no finite file can represent an infinite sequence.  In a processing node, an infinite sequence can exist, but it cannot be streamed out.  (Infinite sequences make sense for circular genomes or peptides.)
 
 ## Miscellaneous
+
+### Useful Links
+
+#### FASTA Specification
+
+* [Wikipedia entry FASTA format](https://en.wikipedia.org/wiki/FASTA_format)
+* [NCBI BLAST specification](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml)
+* [BioStars Discussion](https://www.biostars.org/p/11254/)
+* [Genomatix overview of DNA Sequence Formats](https://www.genomatix.de/online_help/help/sequence_formats.html)
+* [Sequence Ontology Project](http://www.sequenceontology.org/)
 
 ### Glossary
 
