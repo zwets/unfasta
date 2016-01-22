@@ -2,42 +2,41 @@
 
 _Command-line pipes and filters for genomic sequence data._
 
-## Contents
-*
-{: toc}
 
 ## Introduction
 
 [Unfasta](http://io.zwets.it/unfasta) is a suite of command-line utilities for working with sequence data.
 
-The rationale behind unfasta is to have the ability to process genomic sequence data using simple standard utilities like `grep`, `cut` and `head`, in the common [pipes and filters](http://www.dossier-andreas.net/software_architecture/pipe_and_filter.html) style of Unix and GNU.
+The rationale behind unfasta is to have the ability to process genomic sequence data using simple standard utilities like `grep`, `cut` and `head`, in the common [pipes and filters style](http://www.dossier-andreas.net/software_architecture/pipe_and_filter.html) of Unix and GNU.
 
-For instance:
+For instance,
 
 ```bash
 # Compute the GC content of all sequences in a FASTA file
-uf file.fa | sed -n 2~2p | tr -dc 'GC' | wc -c
+uf 'file.fa' | sed -n '2~2p' | tr -dc 'GC' | wc -c
 ```
 
 In that pipeline,
 
-* `uf` reads a FASTA file and outputs it in 'unfasta' format (explained [below](#the-unfasta-file-format), but essentially just FASTA without line breaks in the sequence data);
-* `sed -n 2~2p` filters every second line from its input, writing to standard output only the even-numbered lines, which have the sequence data;
+* `uf` reads a FASTA file and outputs it in 'unfasta' format, collapsing sequence data to single lines;
+* `sed -n 2~2p` filters every second line from its input, thus dropping the header lines;
 * `tr -dc GC` drops from its input all characters except `G` and `C`;
-* `wc -c` counts the number of characters it reads and writes this to standard output.
+* and `wc -c` counts the number of characters it reads, then writes this to standard output.
 
-Pipelines are a simple and powerful way to process large streams of data.  The FASTA format is the party pooper.  By allowing sequence data to span multiple lines, FASTA defies processing using the standard utilities.  Even the seemingly obvious `fgrep -q 'GAATCATCTTTA' file.fa` fails,  yielding a false negative in 10-15% of cases (at query length 12, worse when longer).  Unfasta came about from frustration over this missed opportunity.  It solves the problem quite simply by converting FASTA to "unfasta", FASTA without the pesky line breaks.
+Pipelines are a simple and powerful way to process large streams of data, but the FASTA format is the party pooper.  By allowing sequences to span multiple lines, FASTA defies processing by the line-oriented standard tools.  Even a seemingly obvious `fgrep -q 'GAATCATCTTTA' file.fna` fails with a false negative in 10-15% of cases.  Unfasta originated from frustration over this missed opportunity.
 
-Unfasta isn't intended as the be-all and end-all of genomic sequence processing.  It won't work for everyone.  It does for me because I usually work in bash and have for twenty years been using the Unix/GNU command-line tools to do "complex things in a simple way".  Over that period I have written software in at least a dozen 'proper' programming languages, but when it comes to string processing nothing beats piping together a quick one-liner in bash.  I put unfasta on the web because the law of large numbers dictates that there will be others like me who could benefit from it.
+Unfasta solves the issue by converting FASTA format to 'unfasta format' when it enters the pipeline.  The unfasta format is simply FASTA without line breaks in the sequence data.  As is explained below, [unfasta files are still valid FASTA files](#unfasta-is-fasta).
+
+Unfasta isn't intended as the be-all and end-all of genomic sequence processing.  It won't work for everyone.  It does for me because I usually work in bash and have been using the Unix/GNU toolset for twenty years to do "complex things in a simple way".  Over that period I have written software in at least a dozen 'proper' programming languages, but when it comes to string processing nothing beats piping together a quick one-liner in bash.  If you recognise this, then unfasta will be second nature to you.  
 
 If your natural preference is to work in a graphical user environment, then unfasta may be the occasion to get out of your comfort zone and discover the beauty and power that lies outside.
 
 
 ## Design principles
 
-### The `unfasta` file format
+### The unfasta file format
 
-The `unfasta` file format is FASTA with no line breaks in the sequence data.  For example:
+The unfasta file format is FASTA with no line breaks in the sequence data.  For example:
 
     >id1 Sequence title 1
     CGCACTGTGGCCCCCGAATCTATCTTTACGGC... (indefinite length sequence terminated by newline) 
@@ -47,9 +46,9 @@ The `unfasta` file format is FASTA with no line breaks in the sequence data.  Fo
 
 As in FASTA, there can be an arbitrary number of sequences of arbitrary length.  Contrary to FASTA, the sequence data cannot be broken across lines.  Therefore every sequence is serialised in exactly two lines.  Every odd-numbered line starts with `>` and is a header line, and every even-numbered line is a sequence line.
 
-The `uf` command (filter) converts a stream of FASTA to a stream of unfasta.  It can also do the reverse, but see section [unfasta *is* FASTA](#unfasta-is-fasta).
+The `uf` command (filter) converts a stream of FASTA to a stream of unfasta.  It can also do the reverse, but read section [unfasta *is* FASTA](#unfasta-is-fasta) first.
 
-The header line must start with '>', immediately followed by a (locally unique) sequence identifier. 
+The **header line** must start with '>', immediately followed by the sequence identifier.  The sequence identifier must contain no whitespace.  NCBI specifies additional constraints on the sequence identifier [here](http://ncbi.github.io/cxx-toolkit/pages/ch_demo#fasta-sequence-id-format), summarised [here](http://io.zwets.it/blast-cmdline-ref).  A summary may be followed by whitespace and a sequence title consisting of arbitrary text.
 
 The sequence line can contain any character except newline (which terminate it).  However to be useful it should contain only characters defined by IUPAC here.  @@@HERE@@@  however to make sense.   except 
 
@@ -169,6 +168,7 @@ Infinite sequences are not relevant to unfasta.  Unfasta is a file format, and n
 
 * [Wikipedia entry FASTA format](https://en.wikipedia.org/wiki/FASTA_format)
 * [NCBI BLAST specification](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml)
+* [NCBI Sequence Identifier convention](http://ncbi.github.io/cxx-toolkit/pages/ch_demo)
 * [BioStars Discussion](https://www.biostars.org/p/11254/)
 * [Genomatix overview of DNA Sequence Formats](https://www.genomatix.de/online_help/help/sequence_formats.html)
 * [Sequence Ontology Project](http://www.sequenceontology.org/)
@@ -210,7 +210,7 @@ source
 
 ### License
 
-`unfasta` - command-line pipes and filters for genomic sequence data  
+unfasta - command-line pipes and filters for genomic sequence data  
 Copyright (C) 2016  Marco van Zwetselaar
 
 This program is free software: you can redistribute it and/or modify
