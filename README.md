@@ -23,13 +23,13 @@ In that pipeline,
 * `tr -dc GC` drops from its input all characters except `G` and `C`;
 * and `wc -c` counts the number of characters it reads, then writes this to standard output.
 
-Pipelines are a simple and powerful way to process large streams of data, but the FASTA format is the party pooper.  By allowing sequences to span multiple lines, FASTA defies processing by the line-oriented standard tools.  Even a seemingly obvious `fgrep -q 'GAATCATCTTTA' file.fna` fails with a false negative in 10-15% of cases.  Unfasta originated from frustration over this missed opportunity.
+Pipelines are a simple and powerful way to process large streams of data, but the FASTA format is the party pooper.  By allowing sequences to span multiple lines, FASTA defies processing by line-oriented standard tools.  Even a seemingly obvious `fgrep -q 'GAATCATCTTTA'` fails with a false negative in 10-15% of cases.  Unfasta came about out of frustration over this missed opportunity.
 
 Unfasta solves the issue by converting FASTA format to 'unfasta format' when it enters the pipeline.  The unfasta format is simply FASTA without line breaks in the sequence data.  As is explained below, [unfasta files are still valid FASTA files](#unfasta-is-fasta).
 
-Unfasta isn't intended as the be-all and end-all of genomic sequence processing.  It won't work for everyone.  It does for me because I usually work in bash and have been using the Unix/GNU toolset for twenty years to do "complex things in a simple way".  Over that period I have written software in at least a dozen 'proper' programming languages, but when it comes to string processing nothing beats piping together a quick one-liner in bash.  If you recognise this, then unfasta will be second nature to you.  
+Unfasta isn't intended as the be-all and end-all of genomic sequence processing.  It won't work for everyone.  It does for me because I usually work in bash and have been using the Unix/GNU toolset for twenty years.  Over that period I have written software in at least a dozen 'proper' programming languages, but when it comes to string processing nothing beats piping together a quick one-liner in bash.  If you recognise this, then unfasta will work for you.
 
-If your natural preference is to work in a graphical user environment, then unfasta may be the occasion to get out of your comfort zone and discover the beauty and power that lies outside.
+If your natural preference is to work in a graphical user environment, then unfasta may be the occasion to get out of your comfort zone and discover the beauty and power of the command line.
 
 
 ## Design principles
@@ -44,17 +44,21 @@ The unfasta file format is FASTA with no line breaks in the sequence data.  For 
     SEQUENCE DATA ...
     ...
 
-As in FASTA, there can be an arbitrary number of sequences of arbitrary length.  Contrary to FASTA, the sequence data cannot be broken across lines.  Therefore every sequence is serialised in exactly two lines.  Every odd-numbered line starts with `>` and is a header line, and every even-numbered line is a sequence line.
+As in FASTA, there can be an arbitrary number of sequences of arbitrary length.  Contrary to FASTA, the sequence data cannot be broken across lines.  Therefore every sequence is serialised in exactly two lines.  Every odd-numbered line starts with `>` and is a header line.  Every even-numbered line is a sequence line.
 
-The `uf` command (filter) converts a stream of FASTA to a stream of unfasta.  It can also do the reverse, but read section [unfasta *is* FASTA](#unfasta-is-fasta) first.
+The [`uf`](uf) command (filter) converts a stream of FASTA to a stream of unfasta.  It can also do the reverse, but read section [unfasta *is* FASTA](#unfasta-is-fasta) first.
 
-The **header line** must start with '>', immediately followed by the sequence identifier.  The sequence identifier must contain no whitespace.  NCBI specifies additional constraints on the sequence identifier [here](http://ncbi.github.io/cxx-toolkit/pages/ch_demo#fasta-sequence-id-format), summarised [here](http://io.zwets.it/blast-cmdline-ref).  A summary may be followed by whitespace and a sequence title consisting of arbitrary text.
+##### Header line syntax
+
+The **header line** must start with `>`, immediately followed by the sequence identifier.  The sequence identifier must contain no whitespace.  NCBI specifies additional constraints on the sequence identifier [here](http://ncbi.github.io/cxx-toolkit/pages/ch_demo#fasta-sequence-id-format), summarised [here](http://io.zwets.it/blast-cmdline-ref).  A summary may be followed by whitespace and a sequence title consisting of arbitrary text.
+
+##### Sequence line syntax
 
 The sequence line can contain any character except newline (which terminate it).  However to be useful it should contain only characters defined by IUPAC here.  @@@HERE@@@  however to make sense.   except 
 
+### Open Ends
 
-TODO
-* [ ] extend `uf` to convert also EMBL format data.  
+* [ ] extend `uf` to convert also EMBL format data
 * [ ] check what to do with whitespace in sequence data (currently `uf` removes ALL whitespace)
 
 #### Why the unfasta format?
