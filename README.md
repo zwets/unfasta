@@ -32,6 +32,33 @@ Unfasta isn't intended as the be-all and end-all of genomic sequence processing.
 If your natural preference is to work in a graphical user environment, then unfasta may be the occasion to get out of your comfort zone and discover the beauty and power of the command line.
 
 
+##### Motivating Examples
+
+Some examples to illustrate the benefits of the unfasta file format:
+
+    # Extract all deflines using sed or awk
+    $ sed -n 1~2p
+    $ awk 'NR%2==1'
+    
+    # Extract the data for the 3rd and 12th sequence
+    $ sed -n 7,25p
+    
+    # Extract the header and sequence data for identifier 'gi|22888'
+    $ sed -n '/>gi|22888 /,+1p'
+    
+    # Extract the bases at positions 952-1238 in the first sequence
+    $ sed -n 2p | cut -b 952-1238
+    
+    # Extract a 500 base fragment at position 135
+    $ tail -c +135 | head -c 500	# or: cut -b 135-$((134+500))
+    
+    # How long are the Borrelia sequences?
+    $ awk '/Borrelia/ { getline; print length; }'
+    
+    # Does any sequence contain fragment 'ACGTATAGCGGC'? 
+    $ fgrep -q 'ACGTATAGCGGC' && echo "Yes" || echo "No"
+
+
 ## Design principles
 
 ### The unfasta file format
@@ -44,9 +71,11 @@ The unfasta file format is FASTA with no line breaks in the sequence data.  For 
     SEQUENCE DATA ...
     ...
 
-As in FASTA, there can be an arbitrary number of sequences of arbitrary length.  Contrary to FASTA, the sequence data cannot be broken across lines.  Therefore every sequence is serialised in exactly two lines.  Every odd-numbered line starts with `>` and is a header line.  Every even-numbered line is a sequence line.
-
 The [`uf`](uf) command (filter) converts a stream of FASTA to a stream of unfasta.  It can also do the reverse, but read section [unfasta *is* FASTA](#unfasta-is-fasta) first.
+
+##### Overall structure
+
+As in FASTA, there can be an arbitrary number of sequences of arbitrary length.  Contrary to FASTA, the sequence data cannot be broken across lines.  Therefore every sequence is serialised in exactly two lines.  Every odd-numbered line starts with `>` and is a header line.  Every even-numbered line is a sequence line.
 
 ##### Header line syntax
 
@@ -56,59 +85,10 @@ The **header line** must start with `>`, immediately followed by the sequence id
 
 The sequence line can contain any character except newline (which terminate it).  However to be useful it should contain only characters defined by IUPAC here.  @@@HERE@@@  however to make sense.   except 
 
-### Open Ends
+##### TODO
 
 * [ ] extend `uf` to convert also EMBL format data
 * [ ] check what to do with whitespace in sequence data (currently `uf` removes ALL whitespace)
-
-#### Why the unfasta format?
-
-Some examples will illustrate the benefits of the unfasta file format.
-
-Extract all deflines using `sed` or `awk`:
-
-```bash
-$ sed -n 1~2p
-$ awk 'NR%2==1'
-```
-  
-Extract the data for the 3rd and 12th sequence:
-
-```bash
-$ sed -n 7,25p
-```
-
-Extract the header and sequence data for identifier `gi|22888`:
-
-```bash
-$ sed -n '/>gi|22888 /,+1p'
-```
-
-Extract the bases at positions 952-1238 in the first sequence:
-
-```bash
-$ sed -n 2p | cut -b 952-1238
-```
-
-Extract a 500 base fragment at position 135:
-
-```bash
-$ tail -c +135 | head -c 500	# or: cut -b 135-$((134+500))
-```
-
-How long are the Borrelia sequences?
-
-```bash
-$ awk '/Borrelia/ { getline; print length; }'
-```
-
-Does any sequence contain fragment `ACGTATAGCGGC`? 
-
-```bash
-# Wouldn't fgrep work for FASTA files too?  No, you'd get a false negative
-# about once every 15 queries (at query length 12).  Pesky line breaks.
-$ fgrep -q 'ACGTATAGCGGC' && echo "Yes" || echo "No"
-```
 
 #### Unfasta *is* FASTA
 
@@ -117,25 +97,34 @@ Technically, every unfasta file is a also a FASTA file.  There is no formal spec
 The `uf` tool has a --revert option which does precisely this.  But since the character limit recommendation was set [over 30 years ago](https://en.wikipedia.org/wiki/FASTA)!), technological progress has obliterated its reasons for existence, and I fail to see why we should continue to stick with them.  And of course, any FASTA consumer which fails to read longer lines _does_ violate the spec -- the length limit is only a *recommendation*, right?)  In short, don't revert unfasta back to FASTA and let's see if anything breaks.
 
 
-### Pipes and Filters architecture
+### Pipes and filters architecture
 
 #### Bash is perfect for pipelines
 
 Bash, or indeed any POSIX shell, natively supports pipelines in the most parsimonious way.  A minimum of syntax, a single `|` character, suffices to spawn two concurrent processes and a communication channel between them.  Neither process needs to be specifically written or adapted to participate in a pipeline.  Pipes connect the standard output of the left hand side process to the standard input of the right hand side process.  Processes read from their standard input and write to their standard output without being aware that there is a file or another process at either end.
 
-#### Why pipelines are good
+#### Pipelines are highly efficient
 
-Shell pipelines like the GC-counter in the [Introduction](#introduction) are highly efficient, in more ways than you would realise:
+Shell pipelines like the GC-counter in the [Introduction](#introduction) are highly efficient.  Repeating it here for reference:
+
+```bash
+# Compute the GC content of all sequences in a FASTA file
+uf 'file.fa' | sed -n '2~2p' | tr -dc 'GC' | wc -c
+```
+
+This pipeline is efficient in more ways than you might realise:
 
 * _I/O_. Apart from the obvious initial read, the pipeline performs no disc I/O.  All data travels in-memory from process to process.
 * _Storage_. There is no intermediate storage of data.  Disc space requirement of the pipeline is zero.
 * _Memory_. Each of the four processes needs only analyse a single byte at a time.  The theoretical memory requirement of the pipeline is 4 bytes.
 * _Time_. The four processes run concurrently.  Theoretical time requirement is no worse than that of the slowest process.  The transparent parallelism provided by shell pipelines is underrated.
 
+#### Pipelines are inherently simple
+
 Apart from run-time efficiency, the pipes and filters approach of chaining simple tools together has benefits such as robustness, reusability, and simplicity in terms of cognitive load.  It suffices to understand the individual tools in order to understand their composition -- which in turn is just another stream processor.  As in functional programming (that is, in the absence of side-effects), cognitive load goes up linearly with the number of parts, not quadratically as it does in effectful systems where _N_ parts yield _N×N_ potential interactions to take into account.
 
 
-### Other design decisions
+### Design decisions
 
 #### No Singletons
 
