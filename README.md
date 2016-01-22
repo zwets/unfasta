@@ -27,36 +27,39 @@ Pipelines are a simple and powerful way to process large streams of data, but th
 
 Unfasta solves the issue by converting FASTA format to 'unfasta format' when it enters the pipeline.  The unfasta format is simply FASTA without line breaks in the sequence data.  As is explained below, [unfasta files are still valid FASTA files](#unfasta-is-fasta).
 
+##### Motivating examples
+
+Some examples to illustrate the benefits of single-line sequence data:
+
+```bash
+# Extract all deflines using sed or awk
+$ sed -n 1~2p
+$ awk 'NR%2==1'
+
+# Extract the data for the 3rd and 12th sequence
+$ sed -n 7,25p
+
+# Extract the header and sequence data for identifier 'gi|22888'
+$ sed -n '/>gi|22888 /,+1p'
+
+# Extract the bases at positions 952-1238 in the first sequence
+$ sed -n 2p | cut -b 952-1238
+
+# Extract a 500 base fragment at position 135
+$ tail -c +135 | head -c 500	# or: cut -b 135-$((134+500))
+
+# How long are the Borrelia sequences?
+$ awk '/Borrelia/ { getline; print length; }'
+
+# Does any sequence contain fragment 'ACGTATAGCGGC'? 
+$ fgrep -q 'ACGTATAGCGGC' && echo "Yes" || echo "No"
+```
+
+##### Scope of unfasta
+
 Unfasta isn't intended as the be-all and end-all of genomic sequence processing.  It won't work for everyone.  It does for me because I usually work in bash and have been using the Unix/GNU toolset for twenty years.  Over that period I have written software in at least a dozen 'proper' programming languages, but when it comes to string processing nothing beats piping together a quick one-liner in bash.  If you recognise this, then unfasta will work for you.
 
 If your natural preference is to work in a graphical user environment, then unfasta may be the occasion to get out of your comfort zone and discover the beauty and power of the command line.
-
-
-##### Motivating Examples
-
-Some examples to illustrate the benefits of the unfasta file format:
-
-    # Extract all deflines using sed or awk
-    $ sed -n 1~2p
-    $ awk 'NR%2==1'
-    
-    # Extract the data for the 3rd and 12th sequence
-    $ sed -n 7,25p
-    
-    # Extract the header and sequence data for identifier 'gi|22888'
-    $ sed -n '/>gi|22888 /,+1p'
-    
-    # Extract the bases at positions 952-1238 in the first sequence
-    $ sed -n 2p | cut -b 952-1238
-    
-    # Extract a 500 base fragment at position 135
-    $ tail -c +135 | head -c 500	# or: cut -b 135-$((134+500))
-    
-    # How long are the Borrelia sequences?
-    $ awk '/Borrelia/ { getline; print length; }'
-    
-    # Does any sequence contain fragment 'ACGTATAGCGGC'? 
-    $ fgrep -q 'ACGTATAGCGGC' && echo "Yes" || echo "No"
 
 
 ## Design principles
