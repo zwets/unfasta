@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  uf-map - Apply an operation to all sequences in an unfasta stream.
+#  uf-headers - Extract the headers from an unfasta stream.
 #  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -16,7 +16,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-#  Created on 2016-01-18
+#  Created on 2016-01-25
 
 # Function to exit this script with an error message on stderr
 err_exit() {
@@ -27,17 +27,10 @@ err_exit() {
 # Function to show usage information and exit
 usage_exit() {
 	echo
-	echo "Usage: $(basename $0) [OPTIONS] OPERATION [FILE] ..."
+	echo "Usage: $(basename $0) [OPTIONS] [FILE] ..."
 	echo
-	echo "  Feed every sequence in FILE to OPERATION's standard input.  When no FILE"
-	echo "  is  present or FILE is '-', read from standard input.  Output is the output"
-	echo "  of OPERATION interspersed with every header from the input."
-	echo
-	echo "  Note that OPERATION is started once, not invoked separately for each line."
-	echo "  It must process every line coming in on its standard input separately."
-	echo
-	echo "  Example"
-	echo "  \$ uf-map 'tr [:upper:] [:lower:]'  # convert all seqs to lower case"
+	echo "  Drop the sequence data and output only the headers from each FILE."
+	echo "  If no FILE is present or FILE is '-', read from standard input."
 	echo 
 	exit ${1:-1}
 }
@@ -46,7 +39,7 @@ usage_exit() {
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
 	case $1 in
-	-h|--help)
+	--help)
 		usage_exit 0
 		;;
 	*) usage_exit
@@ -55,13 +48,5 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
 	shift
 done
 
-# Parse arguments
-
-[ $# -ge 1 ] || usage_exit
-OPERATION="$1"
-shift
-
-# AWK it
-
-awk "NR%2==1 { print }; NR%2==0 { print | \"$OPERATION\" }"
+awk 'NR%2==1'
 
