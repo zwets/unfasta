@@ -38,6 +38,7 @@ usage_exit() {
 	echo
 	echo "  Example"
 	echo "  \$ uf-map 'tr [:upper:] [:lower:]'  # convert all seqs to lower case"
+	echo "  \$ uf-map 'sed -re s,^.{12},,'      # drop initial 12 elements from each"
 	echo 
 	exit ${1:-1}
 }
