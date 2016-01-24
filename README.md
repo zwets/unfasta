@@ -102,7 +102,7 @@ The `uf` tool has a `--revert` option which does precisely this.  However the ch
 
 #### Bash is perfect for pipelines
 
-Bash, or indeed any POSIX shell, natively supports pipelines in the most parsimonious way.  The bare minimum of syntax, a single `|`, suffices to spawn two _concurrent_ processes and create a communication channel between them.  Neither process needs to be specifically written or adapted to participate in a pipeline.  Processes read from their standard input and write to their standard output without being aware whether there is a file or another process at either end.
+Bash, or indeed any POSIX shell, natively supports pipelines in the most parsimonious way.  The bare minimum of syntax, a single `|`, suffices to spawn two concurrent processes and create a communication channel between them.  Neither process needs to be specifically written or adapted to participate in a pipeline.  Processes read from their standard input and write to their standard output without being aware whether there is a file or another process at either end.
 
 #### Pipelines are highly efficient
 
@@ -122,7 +122,7 @@ This pipeline is efficient in more ways than you might realise:
 
 #### Pipelines are inherently simple
 
-Apart from run-time efficiency, the pipes and filters approach of chaining simple tools together has benefits such as robustness, reusability, and simplicity in terms of cognitive load.  In a pipeline architecture it suffices to understand the individual filters in order to understand the whole -- in turn just another filter.  As in functional programming (that is, in the absence of side-effects), cognitive load goes up only linearly with the number of parts, not quadratically as it does in effectful systems where _N_ parts yield _N×N_ potential interactions to take into account.
+Apart from run-time efficiency, the pipes and filters approach of chaining simple tools together has benefits such as robustness, reusability, and simplicity in terms of cognitive load.  In a pipeline architecture it suffices to understand the individual filters in order to understand the whole -- which in turn is just another filter.  As in functional programming (that is, in the absence of side-effects), cognitive load goes up only linearly with the number of parts, not quadratically as it does in effectful systems where _N_ parts yield _N×N_ potential interactions to take into account.
 
 
 ### Design decisions

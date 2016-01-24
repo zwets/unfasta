@@ -1,11 +1,22 @@
 #!/bin/sh
 #
-# uf-map
-# Marco van Zwetselaar <io@zwets.it>
-# 2016-01-18
-# 
-# Apply an operation on all sequences in an unfasta file.
+#  uf-map - Apply an operation to all sequences in an unfasta stream.
+#  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
 #
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  Created on 2016-01-18
 
 # Function to exit this script with an error message on stderr
 err_exit() {
@@ -18,15 +29,18 @@ usage_exit() {
 	echo
 	echo "Usage: $(basename $0) [OPTIONS] OPERATION [FILE] ..."
 	echo
-	echo "  When no FILE is present or FILE is '-', read from standard input."
+	echo "  Apply OPERATION to each sequence line in each file.  When no FILE present"
+	echo "  or FILE is '-', read from standard input."
 	echo
 	echo "  For every sequence in each unfasta FILE, copy its header line to standard"
 	echo "  output, then feed its sequence data line to OPERATION's standard input,"
-	echo "  then copy OPERATION's output to standard output."
+	echo "  and copy OPERATION's output to standard output."
 	echo 
-	echo "  Note that OPERATION is started once, not once for every sequence."
-	echo "  It must process every line of sequence data which it sequentially reads"
-	echo "  from standard input."
+	echo "  Note that OPERATION is started once, not invoked separately for each line."
+	echo
+	echo "  Example"
+	echo "  \$ uf-map 'tr [:upper:] [:lower:]'  # convert all seqs to lower case"
+	echo
 	echo 
 	exit ${1:-1}
 }

@@ -1,13 +1,22 @@
-#!/bin/sh
+#!/bin/bash
 #
-# uf - Convert FASTA to unfasta format
-# Marco van Zwetselaar <io@zwets.it>
-# 2016-01-18
-# 
-# Part of blast-galley (http://io.zwets.it/blast-galley).
-
-# The width to use for the reverse operation
-FASTA_LINE_WIDTH=80
+#  uf - Convert FASTA to unfasta format
+#  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  Created on 2016-01-16
 
 # Function to exit this script with an error message on stderr
 err_exit() {
@@ -20,16 +29,21 @@ usage_exit() {
 	echo
 	echo "Usage: $(basename $0) [OPTIONS] [FILE] ..."
 	echo
-	echo "  Convert FILES to unfasta format and write to standard output.  With no FILE"
-	echo "  or when FILE is '-', read standard input."
+	echo "  Convert FILEs to unfasta format and write to standard output.  With no FILE"
+	echo "  or when FILE is '-', read standard input.  Unfasta is FASTA without the pesky"
+	echo "  line breaks mucking up the sequences."
 	echo
-	echo "  Unfasta is FASTA without those pesky newlines mucking up the sequences."
-	echo "  Hence, every unfasta file has an even number of lines, with every odd line"
-	echo "  having a header and every even line containing a sequence."
+	echo "  Options"
+	echo "   -r|--revert  Revert unfasta to FASTA, that is break sequences at 80 chars."
+	echo "        However note that there is no need to revert unfasta 'back' to FASTA."
+	echo "        Every unfasta file IS a FASTA file: the 80 char limit is recommended"
+	echo "        only, and additionally stems from 1985."
 	echo
-	echo "  Technically every unfasta file is also a FASTA file: the FASTA line length"
-	echo "  limit of 80 or 120 is a recommendation (and should be abolished)."
-	echo 
+	echo "  This program strips whitespace including line breaks from the sequence lines,"
+	echo "  but leaves everything else intact.  Use uf-validate for validation."
+	echo
+	echo "  More information about the unfasta suite at http://io.zwets.it/unfasta."
+	echo
 	exit ${1:-1}
 }
 
@@ -52,7 +66,7 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
 done
 
 if [ -n "$REVERT" ]; then
-	awk -v WIDTH=$FASTA_LINE_WIDTH '
+	awk -v WIDTH=80 '
 	/^>/ { print }
 	/^[^>]/ { for (i=1;i<=length();i+=WIDTH) { print substr($0,i,WIDTH); } }' "$@"
 else

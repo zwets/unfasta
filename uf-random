@@ -46,8 +46,8 @@ usage_exit() {
 	echo "  To create biased sequences, repeat characters in CHARS so they have the"
 	echo "  desired proportions.  E.g. \'AACCCTTGGG\' yields sequences with 60% GC."
 	echo
-	echo "  NOTE: the current implementation uses the \$RANDOM bash builtin.  It will"
-	echo "  not work in other (POSIX) shells."
+	echo "  NOTE: the current implementation uses the \$RANDOM builtin to obtain random"
+	echo "  numbers. This is bash specific. TODO: change to read from /dev/urandom."
 	echo
 	exit ${1:-1}
 }
@@ -106,7 +106,7 @@ fi
 
 # Check that we have RANDOM, which is a bash extension - @TODO migrate to /dev/urandom
 
-expr "$RANDOM" : '[0-9]\+$' || err_exit "RANDOM not supported by shell (bashism)"
+expr "$RANDOM" : '[0-9]\+$' >/dev/null || err_exit "\$RANDOM not supported by shell; bash is required."
 
 # Generate the sequences 
 
