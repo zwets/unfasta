@@ -39,9 +39,9 @@ usage_exit() {
 	echo "                lines are generated for the remaining sequences."
 	echo
 	echo "  The HDRSFILE could be a file previously written by 'uf-bare', or output from" 
-	echo "  the 'uf-hdrs' filter.  Tip: use bash process substitution to avoid temp files:"
+	echo "  the 'uf-headers' filter.  Tip: use bash process substitution to avoid tmpfiles:"
 	echo
-	echo '   $ uf file.fna | uf-bare | ..processing.. | uf-dress -r <(uf file.fna | uf-hdrs)'
+	echo '   $ uf file.fna | uf-bare | ..processing.. | uf-dress -r <(uf file.fna | uf-headers)'
 	echo
 	echo "  See also: 'uf-map' which implements this idiom in a single command."
 	echo
