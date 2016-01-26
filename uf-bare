@@ -71,6 +71,6 @@ done
 # Do the work
 
 awk -b -O -v F="$HDRSFILE" '
-	NR%2==1 && F { print > "'"$HDRSFILE"'" }
+	NR%2==1 && F { print > F }
 	NR%2==0' "$@"
 

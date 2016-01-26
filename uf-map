@@ -62,7 +62,39 @@ done
 OPERATION="$1"
 shift
 
-# AWK it
+# Do it 
 
-awk -b -O "NR%2==1 { print }; NR%2==0 { print | \"$OPERATION\" }"
+# FAIL 1: using pipe within awk
+# Fails because of race: external operation is buffering its output, so lines do not come out in the right order.
+#awk -b -O -v OPER="sh -c '$OPERATION'" '
+#	NR%2==1 { print }
+#	NR%2==0 { print | OPER }
+#	{ fflush() }' "$@"
+
+# FAIL 2: using a FIFO between uf-bare and uf-dress
+# Fails because of deadlock: uf-bare blocks on FIFO until uf-dress consumes,
+# but uf-dress is waiting for standard input before consuming from FIFO.
+#FIFO="/tmp/$(basename "$0").$$"
+#mkfifo "$FIFO" 
+#./uf-bare -f -w "$FIFO" | ./uf-dress -r "$FIFO"
+#RETVAL=$?
+#rm -f $FIFO
+
+# Maybe using paste to pull things together?
+
+# Set pipefail to have the errorcode of the rightmost failing filter (OPERATION)
+[ -z "$BASH" ] set +o pipefail
+
+# Make a FIFO to hold the headers and from which paste merges them with OPERATION standard output
+FIFO="/tmp/$(basename "$0").$$"
+mkfifo "$FIFO" 
+
+# Run the pipeline
+awk -b -O -v FIFO="$FIFO" 'NR%2==1 { print > FIFO }; NR%2==0' "$@" | $OPERATION | paste -d '\n' "$FIFO" -
+RETVAL=$?
+
+# Clean up - @TODO@ set a shell trap, is cleaner
+rm -f $FIFO
+
+exit $RETVAL
 

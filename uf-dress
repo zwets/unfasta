@@ -29,17 +29,21 @@ usage_exit() {
 	echo
 	echo "Usage: $(basename $0) [OPTIONS] [FILE] ..."
 	echo
-	echo "  Insert headers to turn bare sequence FILE(s) into valid unfasta.  If no FILE or"
-	echo "  FILE is '-' read from standard input.  Write unfasta to standard output."
+	echo "  Insert headers to turn bare sequences into valid unfasta.  Reads each line from"
+	echo "  each FILE and writes it to standard output preceded by a header line.  If no 
+	echo "  FILE is present or FILE is '-' read from standard input."
 	echo
 	echo "  Options"
-	echo "   -r HDRSFILE   Optional file to read header lines from.  If not specified then"
-	echo "                 default headers 'lcl|NUM' will be generated."
+	echo "   -r HDRSFILE  Optional file to read header lines from.  If not specified or if"
+	echo "                this file has fewer header lines than sequences, then dummy header"
+	echo "                lines are generated for the remaining sequences."
 	echo
 	echo "  The HDRSFILE could be a file previously written by 'uf-bare', or output from" 
 	echo "  the 'uf-hdrs' filter.  Tip: use bash process substitution to avoid temp files:"
 	echo
 	echo '   $ uf file.fna | uf-bare | ..processing.. | uf-dress -r <(uf file.fna | uf-hdrs)'
+	echo
+	echo "  See also: 'uf-map' which implements this idiom in a single command."
 	echo
 	exit ${1:-1}
 }
@@ -70,7 +74,9 @@ done
 # Do the work
 
 awk -b -O -v F="$HDRSFILE" '{
-	if (F) getline HDR < F; else HDR = ">lcl|" NR
+	HDR = ""
+	if (F) getline HDR < F
+	if (!HDR) HDR = ">lcl|" NR " Dummy header " NR
 	print HDR
 	print
 	} 
