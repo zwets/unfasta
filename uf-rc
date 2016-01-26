@@ -1,0 +1,105 @@
+#!/bin/sh
+#
+#  uf-rc - Reverse a/o complement the sequences in an unfasta stream.
+#  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  Created on 2016-01-25
+
+# Nucleic Acids
+#  A  adenosine          C  cytidine             G  guanine
+#  T  thymidine          N  A/G/C/T (any)        U  uridine (EXCLUDED(
+#  K  G/T (keto)         S  G/C (strong)         Y  T/C (pyrimidine) 
+#  M  A/C (amino)        W  A/T (weak)           R  G/A (purine)        
+#  B  G/T/C              D  G/A/T                H  A/C/T      
+#  V  G/C/A              -  gap of indeterminate length (EXCLUDED)
+
+NUCL_ALPHABET="AaCcGgTtNnKkMmSsWwYyRrBbVvDdHh"
+COMP_ALPHABET="TtGgCcAaNnMmKkWwSsRrYyVvBbHhDd"
+
+# Function to exit this script with an error message on stderr
+err_exit() {
+	echo "$(basename "$0"): $*" >&2
+	exit 1
+}
+
+# Function to show usage information and exit
+usage_exit() {
+	echo
+	echo "Usage: $(basename $0) [OPTIONS] [FILE] ..."
+	echo
+	echo "  Write to standard output the reverse complement of every sequence in each FILE."
+	echo "  If no FILE is present or FILE is '-', read from standard input."
+	echo 
+	echo "  Options"
+	echo "   -r|--reverse-only     Reverse only, do not complement."
+	echo "   -c|--complement-only  Complement only, do not reverse."
+	echo "   -m|--mark-header      Document operation by attaching '(uf:rc)' to header"
+	echo 
+	echo "  Case is preserved.  Will also work for the degenerate nucleotide letters."
+	echo "  E.g. complement of Y (pyrimidine, T/C) is R (purine, A/T)."
+	echo
+	exit ${1:-1}
+}
+
+# Defaults
+
+REVERSE=1
+COMPLEMENT=1
+MARK_HEADER=0
+
+# Parse options
+
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
+	case $1 in
+	-r|--reverse-only)
+		COMPLEMENT=0
+		;;
+	-c|--complement-only)
+		REVERSE=0
+		;;
+	-m|--mark-header)
+		MARK_HEADER=1
+		;;
+	--help)
+		usage_exit 0
+		;;
+	*) usage_exit
+		;;
+	esac
+	shift
+done
+
+# Do the work
+
+gawk --lint -b -O -v P="$(basename "$0")" -v C=$COMPLEMENT -v R=$REVERSE -v M=$MARK_HEADER '
+	NR%2==1 { print $0 (M ? " (uf:" (R?"reverse":"") (C?"complement":"") ")" : "") }
+	NR%2==0 {
+		if (R) for (i = length($0); i >= 1; --i) print_maybe_comp()
+		else   for (i = 1; i <= length($0); ++i) print_maybe_comp()
+		printf "\n"
+	}
+	function print_maybe_comp(     c,p) {	# Haha, globals rule, no need to pass i
+		c = substr ($0,i,1)
+		if (C) {
+			p = index ("'$NUCL_ALPHABET'", c)
+			if (!p) {
+				print P ": invalid character, cannot complement: " c
+				exit 1
+			}
+			c = substr ("'$COMP_ALPHABET'", p, 1)
+		}
+		printf "%c", c
+	}' "$@"
