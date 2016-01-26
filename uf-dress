@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-#  uf-bare - Extract the bare sequence data from an unfasta stream.
+#  uf-dress - Turn bare sequence data into an unfasta file.
 #  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
 #
 #  This program is free software: you can redistribute it and/or modify
@@ -29,31 +29,30 @@ usage_exit() {
 	echo
 	echo "Usage: $(basename $0) [OPTIONS] [FILE] ..."
 	echo
-	echo "  Output only the bare sequences from each FILE to stanard output, dropping the"
-	echo "  headers.  If no FILE is present or FILE is '-', read from standard input."
+	echo "  Insert headers to turn bare sequence FILE(s) into valid unfasta.  If no FILE or"
+	echo "  FILE is '-' read from standard input.  Write unfasta to standard output."
 	echo
 	echo "  Options"
-	echo "   -w HDRSFILE   Write the headers to HDRSFILE, which must not already exist."
-	echo "   -f|--force    Overwrite HDRSFILE if it exists."
-	echo 
-	echo "  By default headers go to /dev/null.  Use option -w to store them in a file."
-	echo "  The file can be merged back in with bare sequences using 'uf-dress'."
+	echo "   -r HDRSFILE   Optional file to read header lines from.  If not specified then"
+	echo "                 default headers 'lcl|NUM' will be generated."
+	echo
+	echo "  The HDRSFILE could be a file previously written by 'uf-bare', or output from" 
+	echo "  the 'uf-hdrs' filter.  Tip: use bash process substitution to avoid temp files:"
+	echo
+	echo '   $ uf file.fna | uf-bare | ..processing.. | uf-dress -r <(uf file.fna | uf-hdrs)'
 	echo
 	exit ${1:-1}
 }
 
 # Parse options
 
-unset HDRSFILE FORCE
+unset HDRSFILE
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
 	case $1 in
-	-w)	shift
+	-r)	shift
 		[ $# -ge 1 ] || usage_exit
 		HDRSFILE="$1"
-		;;
-	-f|--force)
-		FORCE="yes"
 		;;
 	--help)
 		usage_exit 0
@@ -66,11 +65,14 @@ done
 
 # Check options validity
 
-[ -z "$HDRSFILE" ] || [ -n "$FORCE" ] || [ ! -e "$HDRSFILE" ] || err_exit "file exists (use --force to overwrite): '$HDRSFILE'"
+[ -z "$HDRSFILE" ] || [ -r "$HDRSFILE" ] || err_exit "cannot read file: '$HDRSFILE'"
 
 # Do the work
 
-awk -b -O -v F="$HDRSFILE" '
-	NR%2==1 && F { print > "'"$HDRSFILE"'" }
-	NR%2==0' "$@"
+awk -b -O -v F="$HDRSFILE" '{
+	if (F) getline HDR < F; else HDR = ">lcl|" NR
+	print HDR
+	print
+	} 
+	END { if (F) close (F) }' "$@"
 
