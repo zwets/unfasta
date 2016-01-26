@@ -66,11 +66,11 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
 done
 
 if [ -n "$REVERT" ]; then
-	awk -v WIDTH=80 '
-	/^>/ { print }
+	gawk -b -O -v WIDTH=80 '
+	/^>/ 
 	/^[^>]/ { for (i=1;i<=length();i+=WIDTH) { print substr($0,i,WIDTH); } }' "$@"
 else
-	awk 'BEGIN { ORS="" }
+	gawk -b -O 'BEGIN { ORS="" }
 	/^>/    { if (NR!=1) print "\n"; print $0 "\n" }
 	/^[^>]/ { print gensub(/[[:space:]]/,"","g") }
 	END { print "\n" }' "$@"

@@ -157,26 +157,26 @@ done
 
 # Do the work
 
-awk -v P="$(basename "$0")" -v WRONG="[^$ALLOW]" -v H=$VAL_HEADERS -v Q=$QUIET -v K=$KEEP_ERRORS -v S=$STOP_ON_ERR -v IGNORECASE=$IGNORE_CASE '
-	{ 	ERR = 0
-		if ( H && $0 !~ /^>[[:alpha:]]+\|\w+(\|\w+)*(\s+.*)?$/ ) {
-			print P ": invalid header at line " NR ": " $0 > "/dev/stderr"
-			ERR = 1
-		}
-		HDR = $0
-		getline SEQ
-		#POS = SEQ ~ WRONG
-		POS = match (SEQ, WRONG)
-		if ( POS ) {
-			print P ": invalid character in sequence at line " NR ", pos " POS ": " substr(SEQ,POS,1) > "/dev/stderr"
-			ERR = 1
-		}
-		if ( (!ERR || K) && !Q ) {
-			print HDR
-			print SEQ
-		}
-		if ( ERR && S ) {
-			exit 1
-		}
-	}' "$@"
+awk -b -O -v P="$(basename "$0")" -v WRONG="[^$ALLOW]" -v H=$VAL_HEADERS -v Q=$QUIET -v K=$KEEP_ERRORS -v S=$STOP_ON_ERR -v IGNORECASE=$IGNORE_CASE '{
+	ERR = 0
+	if ( H && $0 !~ /^>[[:alpha:]]+\|\w+(\|\w+)*(\s+.*)?$/ ) {
+		print P ": invalid header at line " NR ": " $0 > "/dev/stderr"
+		ERR = 1
+	}
+	HDR = $0
+	getline SEQ
+	#POS = SEQ ~ WRONG
+	POS = match (SEQ, WRONG)
+	if ( POS ) {
+		print P ": invalid character in sequence at line " NR ", pos " POS ": " substr(SEQ,POS,1) > "/dev/stderr"
+		ERR = 1
+	}
+	if ( (!ERR || K) && !Q ) {
+		print HDR
+		print SEQ
+	}
+	if ( ERR && S ) {
+		exit 1
+	}
+}' "$@"
 

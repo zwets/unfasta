@@ -64,5 +64,5 @@ shift
 
 # AWK it
 
-awk "NR%2==1 { print }; NR%2==0 { print | \"$OPERATION\" }"
+awk -b -O "NR%2==1 { print }; NR%2==0 { print | \"$OPERATION\" }"
 
