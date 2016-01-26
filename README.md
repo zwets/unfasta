@@ -88,7 +88,7 @@ The header line must start with `>`, immediately followed by the _sequence ident
 
 ##### Sequence line syntax
 
-The sequence line can syntactically contain any character except newline (which terminates it).  However to be semantically valid it must contain only characters defined by IUPAC, and listed in the [NCBI Blast Specification](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml).  Note that `uf` does not check the validity of the characters in the input FASTA file but copies them verbatim to stdout, removing only whitespace.  Use the `uf-validate` filter to check sequence validity.
+The sequence line can syntactically contain any character except newline (which terminates it).  However to be semantically valid it must contain only characters defined by IUPAC, and listed in the [NCBI Blast Specification](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml).  Note that `uf` does not check the validity of the characters in the input FASTA file but copies them verbatim to stdout, removing only whitespace.  Use the `uf-valid` filter to check sequence validity.
 
 
 #### Unfasta *is* FASTA
@@ -137,7 +137,9 @@ As in FASTA, an unfasta file contains a list of zero (does FASTA support this?) 
 
 #### Requirements for filters
 
-Filters must read standard input and write to standard output.  Filters must produce valid unfasta output, that is pairs of lines with the first starting with `>` and the second having sequence data.  For constraints on the sequence data, refer to `uf-validate`.  Filters must be self-documenting, that is support at least the `--help` option.
+Filters must read standard input and write to standard output.  Filters must produce valid unfasta output, that is pairs of lines with the first starting with `>` and the second having sequence data.  For constraints on the sequence data, refer to `uf-valid`.  Filters must be self-documenting, that is support at least the `--help` option.  
+
+The self-documentation requirement is the reason why several of the `uf-*` tools have been implemented as bash scripts while a simple alias would suffice.  E.g. `uf-bare` could have just been `alias uf-bare='awk "NR%2==1"'`, but then there would be no `uf-bare --help`.
 
 #### Zero-length sequences
 

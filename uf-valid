@@ -1,0 +1,182 @@
+#!/bin/sh
+#
+#  uf-valid - Validate the sequences in an unfasta stream.
+#  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  Created on 2016-01-25
+
+# ALPHABETS taken from http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml
+
+# Nucleic Acids
+#  A  adenosine          C  cytidine             G  guanine
+#  T  thymidine          N  A/G/C/T (any)        U  uridine 
+#  K  G/T (keto)         S  G/C (strong)         Y  T/C (pyrimidine) 
+#  M  A/C (amino)        W  A/T (weak)           R  G/A (purine)        
+#  B  G/T/C              D  G/A/T                H  A/C/T      
+#  V  G/C/A              -  gap of indeterminate length (EXCLUDED)
+
+DNA_ALPHABET="ACGTN"
+RNA_ALPHABET="ACGUN"
+NUCL_ALPHABET="ACGTNUKSYMWRBDHV"
+
+# Amino Acids	
+#  A  alanine               P  proline       
+#  B  aspartate/asparagine  Q  glutamine      
+#  C  cystine               R  arginine      
+#  D  aspartate             S  serine      
+#  E  glutamate             T  threonine      
+#  F  phenylalanine         U* selenocysteine (EXCLUDED)
+#  G  glycine               V  valine        
+#  H  histidine             W  tryptophan        
+#  I  isoleucine            Y  tyrosine
+#  K  lysine                Z  glutamate/glutamine
+#  L  leucine               X  any
+#  M  methionine            *  translation stop (EXCLUDED)
+#  N  asparagine            -  gap of indeterminate length (EXCLUDED)
+		
+AMINO_ALPHABET="ABCDEFGHIKLMNPQRSTVXWYZ"
+
+# Function to exit this script with an error message on stderr
+err_exit() {
+	echo "$(basename "$0"): $*" >&2
+	exit 1
+}
+
+# Function to show usage information and exit
+usage_exit() {
+	echo
+	echo "Usage: $(basename $0) [OPTIONS] [FILE] ..."
+	echo
+	echo "  Validate the sequences in each FILE against the allowed alphabet.  If no FILE"
+	echo "  is present or FILE is '-', read from standard input.  Only valid sequences are"
+	echo "  copied to standard output.  For invalid sequences, an error message is printed"
+	echo "  to standard error."
+	echo 
+	echo "  Options"
+	echo "   -a|--allow CHARS  Validate sequences against the alphabet consisting of CHARS."
+	echo "                     May be specified in addition to the synonyms listed below."
+	echo "   -i|--ignore-case  Ignore case for allowed CHARS (default for the synonyms)."
+	echo "   -v|--headers      Also validate the syntax of the headers (default no)."
+	echo "   -s|--stop         Stop processing after the first invalid sequence."
+	echo "   -k|--keep         Do not drop invalid sequences but copy them to standard out."
+	echo "   -q|--quiet        Do not copy standard input to standard output."
+	echo
+	echo "  Synonyms for the usual alphabets (mutually exclusive):"
+	echo "   --dna             Equivalent to: -i -a '$DNA_ALPHABET'"
+	echo "   --rna             Equivalent to: -i -a '$RNA_ALPHABET'"
+	echo "   --nucl            Equivalent to: -i -a '$NUCL_ALPHABET'"
+	echo "   --amino|--prot    Equivalent to: -i -a '$AMINO_ALPHABET'"
+	echo
+	echo "  CAVEAT: when using --allow with symbols other than characters: the current"
+	echo "  implementation is a simple regex search for the complement of the alphabet,"
+	echo "  so symbols which are regex meta-characters like ., ?, and * need escaping."
+	echo 
+	exit ${1:-1}
+}
+
+# Set defaults
+
+ALLOW=""
+IGNORE_CASE=0
+VAL_HEADERS=0
+STOP_ON_ERR=0
+KEEP_ERRORS=0
+QUIET=0
+
+# Parse options
+
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
+	case $1 in
+	--allow=*)
+		ALLOW="${ALLOW}${1#"--allow="}"
+		;;
+	-a|--allow)
+		shift
+		ALLOW="${ALLOW}$1"
+		;;
+	--dna)
+		[ -z "$ALLOW" ] || err_exit "option $1 may be followed by --allow but not otherwise combined"
+		ALLOW="$DNA_ALPHABET"
+		IGNORE_CASE=1
+		;;
+	--rna)
+		[ -z "$ALLOW" ] || err_exit "option $1 may be followed by --allow but not otherwise combined"
+		ALLOW="$RNA_ALPHABET"
+		IGNORE_CASE=1
+		;;
+	--nucl)
+		[ -z "$ALLOW" ] || err_exit "option $1 may be followed by --allow but not otherwise combined"
+		ALLOW="$NUCL_ALPHABET"
+		IGNORE_CASE=1
+		;;
+	--amino|--prot)
+		[ -z "$ALLOW" ] || err_exit "option $1 may be followed by --allow but not otherwise combined"
+		ALLOW="$AMINO_ALPHABET"
+		IGNORE_CASE=1
+		;;
+	-i|--ignore*)
+		IGNORE_CASE=1
+		;;
+	-v|--headers)
+		VAL_HEADERS=1
+		;;
+	-s|--stop)
+		STOP_ON_ERR=1
+		;;
+	-k|--keep-errors)
+		KEEP_ERRORS=1
+		;;
+	-q|--quiet)
+		QUIET=1
+		;;
+	--help)
+		usage_exit 0
+		;;
+	*) usage_exit
+		;;
+	esac
+	shift
+done
+
+# Check that at least some alphabet was selected
+
+[ -n "$ALLOW" ] || err_exit "no valid alphabet specified"
+
+# Do the work
+
+awk -v P="$(basename "$0")" -v WRONG="[^$ALLOW]" -v H=$VAL_HEADERS -v Q=$QUIET -v K=$KEEP_ERRORS -v S=$STOP_ON_ERR -v IGNORECASE=$IGNORE_CASE '
+	{ 	ERR = 0
+		if ( H && $0 !~ /^>[[:alpha:]]+\|\w+(\|\w+)*(\s+.*)?$/ ) {
+			print P ": invalid header at line " NR ": " $0 > "/dev/stderr"
+			ERR = 1
+		}
+		HDR = $0
+		getline SEQ
+		#POS = SEQ ~ WRONG
+		POS = match (SEQ, WRONG)
+		if ( POS ) {
+			print P ": invalid character in sequence at line " NR ", pos " POS ": " substr(SEQ,POS,1) > "/dev/stderr"
+			ERR = 1
+		}
+		if ( (!ERR || K) && !Q ) {
+			print HDR
+			print SEQ
+		}
+		if ( ERR && S ) {
+			exit 1
+		}
+	}' "$@"
+
