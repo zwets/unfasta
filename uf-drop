@@ -1,0 +1,79 @@
+#!/bin/bash
+#
+#  uf-drop - Drop characters from head of unfasta format sequences.
+#  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  Created on 2016-01-27
+
+# Function to exit this script with an error message on stderr
+err_exit() {
+	echo "$(basename "$0"): $*" >&2
+	exit 1
+}
+
+# Function to show usage information and exit
+usage_exit() {
+	echo "
+Usage: $(basename $0) [OPTIONS] NUM [FILE]
+
+  For each sequence in each unfasta format FILE drop the first NUM characters
+  and write the remainder of the sequence to standard output.  If no FILE is
+  present or when FILE is '-', read standard input.  With modifier -b|--but,
+  drop all except the final NUM characters.
+
+  Options
+   -b|--but   Drop everything BUT the final NUM characters from each sequence.
+   -m|--mark  Document the edit by appending '(uf:drop:[but:]NUM)' to headers.
+" >&2
+	exit ${1:-1}
+}
+
+# Parse options
+
+BUT=0
+MARK=0
+
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
+	case $1 in
+	-m|--mark)
+		MARK=1
+		;;
+	-b|--but)
+		BUT=1
+		;;
+	-h|--help)
+		usage_exit 0
+		;;
+	*) usage_exit
+		;;
+	esac
+	shift
+done
+
+# Check first argument is positive number
+
+[ $# -ge 1 -a "$(expr "$1" : '\([0-9]\+\)')" = "$1" ] || usage_exit
+
+NUM=$1
+shift
+
+# Delegate to awk
+
+awk -b -O -v P="$(basename "$0")" -v N=$NUM -v M=$MARK -v B=$BUT '
+	NR%2==1 { print $0 (M ? " (uf:drop:" (B?"but:":"") N ")" : "") }
+	NR%2==0 { print B ? substr ($0,length($0)-N+1) : substr ($0,N+1) }
+	' "$@"
+
