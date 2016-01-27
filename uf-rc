@@ -46,7 +46,7 @@ usage_exit() {
 	echo "  Options"
 	echo "   -r|--reverse-only     Reverse only, do not complement."
 	echo "   -c|--complement-only  Complement only, do not reverse."
-	echo "   -m|--mark-header      Document operation by attaching '(uf:rc)' to header"
+	echo "   -m|--mark[-header]    Document operation by attaching '(uf:...)' to headers."
 	echo 
 	echo "  Case is preserved.  Will also work for the degenerate nucleotide letters."
 	echo "  E.g. complement of Y (pyrimidine, T/C) is R (purine, A/T)."
@@ -58,7 +58,7 @@ usage_exit() {
 
 REVERSE=1
 COMPLEMENT=1
-MARK_HEADER=0
+MARK=0
 
 # Parse options
 
@@ -70,8 +70,8 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
 	-c|--complement-only)
 		REVERSE=0
 		;;
-	-m|--mark-header)
-		MARK_HEADER=1
+	-m|--mark*)
+		MARK=1
 		;;
 	--help)
 		usage_exit 0
@@ -84,7 +84,7 @@ done
 
 # Do the work
 
-gawk --lint -b -O -v P="$(basename "$0")" -v C=$COMPLEMENT -v R=$REVERSE -v M=$MARK_HEADER '
+gawk --lint -b -O -v P="$(basename "$0")" -v C=$COMPLEMENT -v R=$REVERSE -v M=$MARK '
 	NR%2==1 { print $0 (M ? " (uf:" (R?"reverse":"") (C?"complement":"") ")" : "") }
 	NR%2==0 {
 		if (R) for (i = length($0); i >= 1; --i) print_maybe_comp()
