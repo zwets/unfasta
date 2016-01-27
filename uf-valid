@@ -69,7 +69,7 @@ usage_exit() {
 	echo "   -a|--allow CHARS  Validate sequences against the alphabet consisting of CHARS."
 	echo "                     May be specified in addition to the synonyms listed below."
 	echo "   -i|--ignore-case  Ignore case for allowed CHARS (default for the synonyms)."
-	echo "   -v|--headers      Also validate the syntax of the headers (default no)."
+	echo "   -v|--headers      Validate the syntax of the headers against NCBI conditions."
 	echo "   -s|--stop         Stop processing after the first invalid sequence."
 	echo "   -k|--keep         Do not drop invalid sequences but copy them to standard out."
 	echo "   -q|--quiet        Do not copy standard input to standard output."
@@ -159,17 +159,25 @@ done
 
 awk -b -O -v P="$(basename "$0")" -v WRONG="[^$ALLOW]" -v H=$VAL_HEADERS -v Q=$QUIET -v K=$KEEP_ERRORS -v S=$STOP_ON_ERR -v IGNORECASE=$IGNORE_CASE '{
 	ERR = 0
-	if ( H && $0 !~ /^>[[:alpha:]]+\|\w+(\|\w+)*(\s+.*)?$/ ) {
-		print P ": invalid header at line " NR ": " $0 > "/dev/stderr"
+	HDR = $0
+	if ( HDR !~ /^>/ ) {
+		print P ": no FASTA header found at line " NR
+		ERR = 1
+	} 
+	else if ( H && HDR !~ /^>[[:alpha:]]+\|\w+(\|\w+)*(\s+.*)?$/ ) {  # rudimentary syntax check of header
+		print P ": invalid header syntax at line " NR ": " HDR > "/dev/stderr"
 		ERR = 1
 	}
-	HDR = $0
-	getline SEQ
-	#POS = SEQ ~ WRONG
-	POS = match (SEQ, WRONG)
-	if ( POS ) {
-		print P ": invalid character in sequence at line " NR ", pos " POS ": " substr(SEQ,POS,1) > "/dev/stderr"
+	if ( getline SEQ != 1 ) {
+		print P ": read error or end of file, no sequence read at line " NR
 		ERR = 1
+	}
+	else {
+		POS = match (SEQ, WRONG)
+		if ( POS ) {
+			print P ": invalid character in sequence at line " NR ", pos " POS ": " substr(SEQ,POS,1) > "/dev/stderr"
+			ERR = 1
+		}
 	}
 	if ( (!ERR || K) && !Q ) {
 		print HDR
