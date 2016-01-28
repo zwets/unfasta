@@ -156,6 +156,20 @@ There are two reasons to support zero-length sequences.  Firstly, a zero-length 
 
 Infinite sequences are not relevant to unfasta.  Unfasta is a file format, and no finite file can represent an infinite sequence.  Inside a processing node (filter), an infinite sequence can exist, but it cannot be streamed out.  (Infinite sequences make sense for circular genomes or peptides.)
 
+## Current unfasta tools
+
+|`uf`| Convert FASTA to unfasta |
+|`uf-bare`| Filter the bare sequence data, strip the headers |
+|`uf-circut`| Take cuts from circular sequences, allowing wraparound |
+|`uf-cut`| Take cuts from linear sequences |
+|`uf-dress`| Undo the effect of uf-bare: add headers to a stream of bare sequence data |
+|`uf-drop`| Drop the initial N elements from a sequence |
+|`uf-headers`| Filter the headers only, drop the sequence data |
+|`uf-map`| Apply an operation to every line of sequence data in turn |
+|`uf-random`| Generate random sequences of DNA, RNA, amino acids (or indeed any other alphabet) |
+|`uf-rc`| Reverse complement a stream of unfasta |
+|`uf-take`| Take the initial N elements from every line of sequence data |
+|`uf-valid`| Validate an unfasta stream against its allowed alphabbet |
 
 ## Miscellaneous
 
