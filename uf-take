@@ -27,7 +27,7 @@ err_exit() {
 # Function to show usage information and exit
 usage_exit() {
 	echo "
-Usage: $(basename $0) [OPTIONS] NUM [FILE]
+Usage: $(basename $0) [OPTIONS] NUM [FILE ...]
 
   For each sequence in each unfasta format FILE write the first NUM characters
   to standard output.  If no FILE is present or when FILE is '-', read standard

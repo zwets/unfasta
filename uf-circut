@@ -1,0 +1,181 @@
+#!/bin/sh
+#
+#  uf-circut - Take a section from circular sequences in unfasta format.
+#  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  Created on 2016-01-27
+
+# Function to exit this script with an error message on stderr
+err_exit() {
+	echo "$(basename "$0"): $*" >&2
+	exit 1
+}
+
+# Function to show usage information and exit
+usage_exit() {
+	echo "
+Usage: $(basename $0) [OPTIONS] FROM:END [FILE] ...
+       $(basename $0) [OPTIONS] FROM/LEN [FILE] ...
+       $(basename $0) [OPTIONS] MID~DIST [FILE] ...
+
+  Cut a segment from each sequence in each unfasta FILE and write to standard
+  output.  If no FILE is present or when FILE is '-', read standard input.
+  Sequences are taken to be circular and cuts wrap around.  For straight cuts
+  use uf-cut.  Sequences for which the cut fails are not written to standard
+  output unless option -z|--zero is present.
+
+  Options
+   -q|--quiet   Do not emit messages about failed cuts.
+   -z|--zero    Output a zero length sequence for a failed cut.
+   -m|--mark    Document the cut by appending '(uf:circut:...)' to header.
+
+  There are three ways to specify the section:
+  1. FROM:END cuts the section starting at position FROM and ending at poition
+     END.  If END is left of FROM, then the section returned wraps around the
+     end of the sequence.
+  2. FROM/LEN cuts a section of length LEN starting at position FROM, wrapping
+     around if FROM+LEN extends beyond the end of the sequence.
+  3. MID~DIST cuts a section starting DIST left from MID and ending DIST right
+     of MID, wrapping around if either end extends beyond en of sequence.
+
+  The following constraints must be met.  Failing cuts lead to a diagnostic
+  message on standard error.  The botched cut will not be output.
+
+  Constraints:
+  - Positions (FROM, END, MID) are 1-based; negative values count backward from
+    the rightmost element; FROM. END and MID must be on the sequence and hence
+    values must be in range 1..LENGTH or -1..-LENGTH;
+  - Lengths (LEN, DIST) are positive numbers; LEN must be in range 1..LENGTH;
+    DIST must be in range 0..(LENGTH-1)/2; these constraints prevent the cut
+    from being longer than the sequence and 'wrapping onto itself'.
+  - In the FROM:END case, when FROM is positive and END is negative, then END
+    must not resolves to a position left of FROM.  Inversely, when FROM is
+    negative and END is positive then END must end up left of FROM.  In short:
+    M:-N never wraps, -M:N always wrap.  (Guarantees least surprise behaviour.)
+
+  Examples, tip and tricks:
+  - $(basename "$0") -10:11  Select 21 bases around pos 1 of cyclic seq
+  - $(basename "$0") 1~10    Same result as above
+  - $(basename "$0") -10/21  Same result as above
+  - $(basename "$0") 100:99  rotates the sequence left by 99 positions
+" >&2
+	exit ${1:-1}
+}
+
+# Parse options
+
+QUIET=0
+ZERO=0
+MARK=0
+
+while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\).*')" = "-" ]; do
+	case $1 in
+	-m|--mark)
+		MARK=1
+		;;
+	-z|--zero)
+		ZERO=1
+		;;
+	-q|--quiet)
+		QUIET=1
+		;;
+	-h|--help)
+		usage_exit 0
+		;;
+	*) usage_exit
+		;;
+	esac
+	shift
+done
+
+# Parse the cut specification - arrr walk the regex plank matey
+
+[ $# -ge 1 -a "$(expr "$1" : '^\(-\?[1-9][0-9]*\(:-\?[1-9][0-9]*\|\(/[1-9]\|~[0-9]\)[0-9]*\)\)$')" = "$1" ] || usage_exit
+
+CUT_SPEC=$1
+shift
+
+# Parse the bits out of the cut specification
+
+LHS="$(expr "$CUT_SPEC" : '\(.*\)[/:~].*')"
+OP="$(expr  "$CUT_SPEC" : '.*\([/:~]\).*')"
+RHS="$(expr "$CUT_SPEC" : '.*[/:~]\(.*\)')"
+
+# Delegate to awk
+
+awk -b -O -v P="$(basename "$0")" -v FROM=$LHS -v MID=$LHS -v UPTO=$RHS -v LEN=$RHS -v DIST=$RHS -v OP="$OP" -v Z=$ZERO -v Q=$QUIET -v M=$MARK '
+function bump0(p1,p2) { return p1 < 0 && p2 >= 0 ? 1 : 0 }	# return 1 if from p1 to p2 crosses 0
+
+BEGIN { 
+    # Translate the three possible cut specs into POS0 (left) and POS1 (right)
+    if (OP == ":") { 
+        POS0 = FROM; POS1 = UPTO
+    } else if (OP == "/") { 
+        POS0 = FROM; POS1 = FROM+LEN-1; POS1 += bump0(FROM,POS1)
+    } else if (OP == "~") {
+        POS0 = MID-DIST; POS0 -= bump0(POS0,MID)
+        POS1 = MID+DIST; POS1 += bump0(MID,POS1)
+    }
+}
+
+NR%2==1 { # Store header, will be printed only when sequence processes alright
+    HDR = $0
+}
+
+function map_on_seq(n,l) { return n < 0 ? (n < -l ? n+l+l : n+l) + 1 : (n > l ? n - l : n) } 
+
+NR%2==0 { # Process sequence line
+    N = length($0)
+
+    if ( validate() ) {
+        X = map_on_seq(POS0,N); Y = map_on_seq(POS1,N)
+        print HDR (M ? " (uf:circut:" X ":" Y ")" : "") 
+        print X <= Y ? substr($0,X,Y-X+1) : (substr($0,X) substr($0,1,Y))
+    }
+    else if (Z) { # invalid cut, if flag zero then output a zero length seq
+        print HDR (M ? " (uf:circut:" POS0 ":" POS1 ":failed)" : "") 
+        print ""
+    } 
+}
+
+END { 
+    close("/dev/stderr") 
+}
+
+function abs(n) { return n<0 ? -n : n }
+
+function val_error(s) { if (!Q) print P ": line " NR ": " s > "/dev/stderr"; return 0; }
+
+function validate() {
+    if (OP == ":") {
+        if (abs(FROM) > N) return val_error("FROM position (" FROM ") outside sequence length (" N ")") 
+        if (abs(UPTO) > N) return val_error("END position (" UPTO ") outside sequence length (" N ")")
+        # Check the cases specified in the constraint for guaranteeing least surprise
+        if (FROM < 0 && UPTO > 0 && UPTO-FROM > N) return val_error("sequence too short (" N ") for wrap " FROM ":" UPTO)
+        if (FROM > 0 && UPTO < 0 && FROM-UPTO > N+1) return val_error("sequence too short (" N ") for cut " FROM ":" UPTO)
+    } 
+    else if (OP == "/") {
+        if (abs(FROM) > N) return val_error("FROM position (" FROM ") outside sequence length (" N ")") 
+        if (LEN > N) return val_error("requested length (" LEN ") exceeds sequence length (" N ")")
+    }
+    else if (OP == "~") {
+        if (abs(MID) > N) return val_error("MID position (" MID ") outside sequence length (" N ")") 
+        if (2*DIST+1 > N) return val_error("requested width (" 2*DIST+1 ") exceeds sequence length (" N ")")
+    }
+    return 1
+}
+' "$@"
+

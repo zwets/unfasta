@@ -1,0 +1,202 @@
+#!/bin/bash
+#
+#  uf-cut - Take a section from linear sequences in unfasta format.
+#  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  Created on 2016-01-27
+
+# Function to exit this script with an error message on stderr
+err_exit() {
+	echo "$(basename "$0"): $*" >&2
+	exit 1
+}
+
+# Function to show usage information and exit
+usage_exit() {
+	echo "
+Usage: $(basename $0) [OPTIONS] FROM:END [FILE] ...
+       $(basename $0) [OPTIONS] FROM/LEN [FILE] ...
+       $(basename $0) [OPTIONS] MID~DIST [FILE] ...
+
+  Cut a segment from each sequence in each unfasta FILE and write to standard
+  output.  If no FILE is present or when FILE is '-', read standard input.
+  Sequences for which the cut fails are not written to standard output unless
+  option -z|--zero is present.  There is also uf-circut for circular sequences.
+
+  Options
+   -c|--clip    Clip returned sequence if cut spec overhangs target sequence.
+   -q|--quiet   Do not emit messages about failed cuts.
+   -z|--zero    Output a zero length sequence for a failed cut.
+   -m|--mark    Document the cut by appending '(uf:cut:...)' to header.
+
+  There are three ways to specify the section:
+  1. FROM:END cuts section starting at position FROM and ending at position END.
+  2. FROM/LEN cuts a section of length LEN starting at position FROM.  
+  3. MID~DIST cuts starting DIST left from MID and ending DIST right of MID.
+
+  The following constraints must be met.  Failing cuts lead to a diagnostic
+  message on standard error.  The botched cut will not be output.
+
+  Constraints:
+  - Positions (FROM, END, MID) are 1-based; negative values count backward from
+    the rightmost element; valid position values therefore are ranges 1..LENGTH
+    and -1..-LENGTH;
+  - Lengths (LEN, DIST) are positive numbers; LEN must not be 0; DIST may be 0.
+  - Unless clipping is enabled it is an error if either end of the cut interval
+    lies outside of the target sequence.  If clipping is enabled then one end
+    must lie in the target sequence; if the other overhangs it will be clipped.
+  - In the FROM:END case, if FROM is negative then END must be negative; but 
+    FROM may be positive and END negative (to trim both ends); in all cases,
+    if END resolves to position left of FROM, a 0-length cut results.
+
+  Examples, tip and tricks:
+  - '$(basename "$0") 1:-1'       Selects the entire sequence
+  - '$(basename "$0") 5:-5'       Trim four elements off of both ends
+  - '$(basename "$0") x:x'        Selects the single base at position x
+  - '$(basename "$0") x/1'        Same result as previous
+  - '$(basename "$0") x~0'        Same result as previous
+" >&2
+	exit ${1:-1}
+}
+
+# Parse options
+
+QUIET=0
+ZERO=0
+CLIP=0
+MARK=0
+
+while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\).*')" = "-" ]; do
+	case $1 in
+	-m|--mark)
+		MARK=1
+		;;
+	-c|--clip)
+		CLIP=1
+		;;
+	-q|--quiet)
+		QUIET=1
+		;;
+	-z|--zero)
+		ZERO=1
+		;;
+	-h|--help)
+		usage_exit 0
+		;;
+	*) usage_exit
+		;;
+	esac
+	shift
+done
+
+# Parse the cut specification - arrr walk the regex plank matey
+
+[ $# -ge 1 -a "$(expr "$1" : '^\(-\?[1-9][0-9]*\(:-\?[1-9][0-9]*\|\(/[1-9]\|~[0-9]\)[0-9]*\)\)$')" = "$1" ] || usage_exit
+
+CUT_SPEC=$1
+shift
+
+# Parse the bits out of the cut specification
+
+LHS="$(expr "$CUT_SPEC" : '\(.*\)[/:~].*')"
+OP="$(expr  "$CUT_SPEC" : '.*\([/:~]\).*')"
+RHS="$(expr "$CUT_SPEC" : '.*[/:~]\(.*\)')"
+
+# Delegate to awk
+awk -b -O -v P="$(basename "$0")" -v FROM=$LHS -v MID=$LHS -v UPTO=$RHS -v LEN=$RHS -v DIST=$RHS -v OP="$OP" -v C=$CLIP -v Z=$ZERO -v Q=$QUIET -v M=$MARK '
+function abs(n) { return n < 0 ? -n : n }
+function cross0(p1,p2) { return p1 < 0 && p2 >= 0 ? 1 : 0 }      # return 1 if from p1 to p2 crosses 0
+function error_out(s) { print P ": error: " s > "/dev/stderr"; exit 1 }
+function warn(s) { print P ": warning: " s > "/dev/stderr" }
+
+BEGIN { 
+    # Translate the three possible cut specs into POS0 (left) and POS1 (right)
+    if (OP == ":") { 
+        POS0 = FROM; POS1 = UPTO
+        if ( cross0(POS0,POS1) || (POS1 < POS0 && ((POS0<0 && POS1<0) || (POS0>0 && POS1>0))) )
+            error_out("invalid cut specification (use uf-circut for circular cuts)")
+    } else if (OP == "/") { 
+        POS0 = FROM; POS1 = FROM+LEN-1
+        if ( cross0(POS0,POS1) )
+            if (C) { LEN = abs(POS0); POS1 = -1; warn("clipping LEN to " LEN); }
+            else error_out("FROM+LEN overhangs right side and clipping not enabled")
+    } else if (OP == "~") {
+        POS0 = MID-DIST
+        if ( cross0(POS0,MID) )
+            if (C) { POS0 = 1; warn("clipping left DIST to " MID-1); }
+            else error_out("MID-DIST overhangs left side and clipping not enabled")
+        POS1 = MID+DIST
+        if ( cross0(MID,POS1) )
+            if (C) { POS1 = -1; warn("clipping right DIST to " abs(MID)-1); }
+            else error_out("MID+DIST overhangs right side and clipping not enabled")
+    }
+    # POSTCONDITION: 
+    # either POS0 and POS1 are both negative, or POS0 and POS1 are both positive, 
+    #        and in both cases POS0 < POS1, so there will be a proper cut
+    # or     POS0 is positive and POS1 is negative (the trimming case) and the cut
+    #        may result in a zero length result.
+}
+
+NR%2==1 { # Store header, will be printed only when sequence processes alright
+    HDR = $0
+}
+
+NR%2==0 {
+    N=length($0)
+
+    if ( validate_and_map() ) {
+        print HDR (M ? " (uf:cut:" X ":" Y ")" : "") 
+        print substr($0,X,Y-X+1)
+    } 
+    else if (Z) { # invalid cut, if flag zero then output a zero length seq
+        print HDR (M ? " (uf:cut:" POS0 ":" POS1 ":failed)" : "") 
+        print ""
+    }
+}
+
+END { 
+    close("/dev/stderr") 
+}
+
+function val_error(s) { if (!Q) print P ": line " NR ": " s > "/dev/stderr"; return 0; }
+function val_warn(s) { if (!Q) print P ": line " NR ": " s > "/dev/stderr" }
+
+function validate_and_map() {
+    # First handle the special (trimming) case
+    if (POS0 > 0 && POS1 < 0) {
+        if (POS0 > N) return val_error("leftmost position (" POS0 ") beyond end of sequence (" N ")")
+        if (abs(POS1) > N) return val_error("rightmost position (" POS1 ") before start of sequence (" -N ")")
+        X = POS0; Y = POS1+N+1
+        if (Y < X) val_warn("warning: trim " POS0 ":" POS1 " yields zero-length sequence")
+    }
+    else { # see POSTCONDITION, we need only check and clip
+        if (POS0 > 0) # and POS1 will also be
+            if (POS0 > N) return val_error("leftmost position (" POS0 ") beyond end of sequence (" N ")")
+            else if (POS1 > N)
+                if (C) { X = POS0; Y = N; val_warn("clipping cut at end of sequence (" N ")") }
+                else return val_error("rightmost position (" POS1 ") beyond end of sequence and no clipping")
+            else { X = POS0; Y = POS1 }
+        else # POS0 < 0
+            if (POS1 < N) return val_error("rightmost position (" POS1 ") before start if sequence (" -B ")")
+            else if (POS0 < N)
+                if (C) { X = 1; Y = POS1+N+1; val_warn("clipping cut at start of sequence (" N ")") }
+                else return val_error("leftmost position (" POS0 ") before start of sequence and no clipping")
+            else { X = POS0+N+1; Y = POS1+N+1 }
+    }
+    return 1
+}
+' "$@"
+
