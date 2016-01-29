@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 #  uf - Convert FASTA to unfasta format
 #  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
@@ -66,13 +66,13 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
 done
 
 if [ -n "$REVERT" ]; then
-	gawk -b -O -v WIDTH=80 '
+	awk -b -O -v WIDTH=80 '
 	/^>/ 
 	/^[^>]/ { for (i=1;i<=length();i+=WIDTH) { print substr($0,i,WIDTH); } }' "$@"
 else
-	gawk -b -O 'BEGIN { ORS="" }
+	awk -b -O 'BEGIN { ORS="" }
 	/^>/    { if (NR!=1) print "\n"; print $0 "\n" }
-	/^[^>]/ { print gensub(/[[:space:]]/,"","g") }
+	/^[^>]/ { gsub(/[[:space:]]/,""); print $0 }
 	END { print "\n" }' "$@"
 fi
 

@@ -26,25 +26,25 @@ err_exit() {
 
 # Function to show usage information and exit
 usage_exit() {
-	echo
-	echo "Usage: $(basename $0) [OPTIONS] [FILE] ..."
-	echo
-	echo "  Insert headers to turn bare sequences into valid unfasta.  Reads each line from"
-	echo "  each FILE and writes it to standard output preceded by a header line.  If no 
-	echo "  FILE is present or FILE is '-' read from standard input."
-	echo
-	echo "  Options"
-	echo "   -r HDRSFILE  Optional file to read header lines from.  If not specified or if"
-	echo "                this file has fewer header lines than sequences, then dummy header"
-	echo "                lines are generated for the remaining sequences."
-	echo
-	echo "  The HDRSFILE could be a file previously written by 'uf-bare', or output from" 
-	echo "  the 'uf-headers' filter.  Tip: use bash process substitution to avoid tmpfiles:"
-	echo
-	echo '   $ uf file.fna | uf-bare | ..processing.. | uf-dress -r <(uf file.fna | uf-headers)'
-	echo
-	echo "  See also: 'uf-map' which implements this idiom in a single command."
-	echo
+	echo "
+Usage: $(basename $0) [OPTIONS] [FILE] ...
+
+  Insert headers to turn bare sequences into valid unfasta.  Reads each line from
+  each FILE and writes it to standard output preceded by a header line.  If no 
+  FILE is present or FILE is '-' read from standard input.
+
+  Options
+   -r HDRSFILE  Optional file to read header lines from.  If not specified or if
+                this file has fewer header lines than sequences, then dummy header
+                lines are generated for the remaining sequences.
+
+  The HDRSFILE could be a file previously written by 'uf-bare', or output from
+  the 'uf-headers' filter.  Tip: use bash process substitution to avoid tmpfiles:
+
+  $ uf file.fna | uf-bare | ..processing.. | uf-dress -r <(uf file.fna | uf-headers)
+
+  See also: 'uf-map' which implements this idiom in a single command.
+"
 	exit ${1:-1}
 }
 

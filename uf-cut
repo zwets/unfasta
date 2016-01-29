@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 #  uf-cut - Take a section from linear sequences in unfasta format.
 #  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 #  uf-drop - Drop characters from head of unfasta format sequences.
 #  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>

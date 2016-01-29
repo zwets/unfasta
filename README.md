@@ -65,7 +65,7 @@ Find [Unfasta on GitHub](http://github.com/zwets/unfasta).
 
 
 
-## Current unfasta tools
+## Current unfasta collection
 
 |Tool|Description|
 |----|-----------|
@@ -82,6 +82,7 @@ Find [Unfasta on GitHub](http://github.com/zwets/unfasta).
 |`uf-take`| Take the initial N elements from a sequence, or take elements until N are left |
 |`uf-valid`| Validate an unfasta stream against its allowed alphabet and NCBI conventions |
 
+Each has a `-h|--help` option for usage instructions.  All depend only on `awk` and a POSIX shell, except `uf-random` which requires `bash` for its `RANDOM` extension.
 
 
 ## Design principles
@@ -158,7 +159,7 @@ Stick with the NCBI BLAST specifications for FASTA header lines, sequence identi
 
 Filters must read standard input and write to standard output.  Filters must produce valid unfasta output, that is pairs of lines with the first starting with `>` and the second having sequence data.  For constraints on the sequence data, refer to `uf-valid`.  Filters must be self-documenting, that is support at least the `--help` option.  
 
-The self-documentation requirement is the reason why several of the `uf-*` tools have been implemented as bash scripts while a simple alias would suffice.  E.g. `uf-bare` could have just been `alias uf-bare='awk "NR%2==1"'`, but then there would be no `uf-bare --help`.
+The self-documentation requirement is the reason why several of the `uf-*` tools have been implemented as shell scripts while a simple alias would suffice.  E.g. `uf-bare` could have just been `alias uf-bare='awk "NR%2==1"'`, but then there would be no `uf-bare --help`.
 
 #### Zero-length sequences
 
