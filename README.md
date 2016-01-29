@@ -158,6 +158,8 @@ Infinite sequences are not relevant to unfasta.  Unfasta is a file format, and n
 
 ## Current unfasta tools
 
+|Tool|Description|
+|----|-----------|
 |`uf`| Convert FASTA to unfasta |
 |`uf-bare`| Filter the bare sequence data, strip the headers |
 |`uf-circut`| Take cuts from circular sequences, allowing wraparound |
@@ -169,7 +171,7 @@ Infinite sequences are not relevant to unfasta.  Unfasta is a file format, and n
 |`uf-random`| Generate random sequences of DNA, RNA, amino acids (or indeed any other alphabet) |
 |`uf-rc`| Reverse complement a stream of unfasta |
 |`uf-take`| Take the initial N elements from every line of sequence data |
-|`uf-valid`| Validate an unfasta stream against its allowed alphabbet |
+|`uf-valid`| Validate an unfasta stream against its allowed alphabbet and NCBI defline conventions |
 
 ## Miscellaneous
 
