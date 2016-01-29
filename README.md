@@ -70,17 +70,17 @@ Find [Unfasta on GitHub](http://github.com/zwets/unfasta).
 |Tool|Description|
 |----|-----------|
 |`uf`| Convert FASTA to unfasta |
-|`uf-bare`| Filter the bare sequence data, strip the headers |
-|`uf-circut`| Take cuts from circular sequences, allowing wraparound |
-|`uf-cut`| Take cuts from linear sequences |
-|`uf-dress`| Undo the effect of uf-bare: add headers to a stream of bare sequence data |
-|`uf-drop`| Drop the initial N elements from a sequence |
-|`uf-headers`| Filter the headers only, drop the sequence data |
+|`uf-bare`| Strip the headers, output only the bare sequences |
+|`uf-circut`| Cut sections out of circular sequences, allowing wraparound |
+|`uf-cut`| Cut sections from linear sequences |
+|`uf-dress`| Undo the effect of `uf-bare`: add headers to a stream of bare sequence data |
+|`uf-drop`| Drop the initial N elements from a sequence, or drop elements until N are left |
+|`uf-headers`| Strip the sequence data, output only the sequence headers |
 |`uf-map`| Apply an operation to every line of sequence data in turn |
-|`uf-random`| Generate random sequences of DNA, RNA, amino acids (or indeed any other alphabet) |
-|`uf-rc`| Reverse complement a stream of unfasta |
-|`uf-take`| Take the initial N elements from every line of sequence data |
-|`uf-valid`| Validate an unfasta stream against its allowed alphabbet and NCBI defline conventions |
+|`uf-random`| Generate random sequences of DNA, RNA, amino acids, or any other alphabet |
+|`uf-rc`| Reverse and/or complement a stream of unfasta |
+|`uf-take`| Take the initial N elements from a sequence, or take elements until N are left |
+|`uf-valid`| Validate an unfasta stream against its allowed alphabet and NCBI conventions |
 
 
 
@@ -114,7 +114,7 @@ The sequence line can syntactically contain any character except newline (which 
 
 Technically, every unfasta file is a also a FASTA file.  None of the *de facto* specifications (see the [links below](#fasta-specification)) of the FASTA format **mandate** a maximum line length.  Several **recommend** an 80 or 120 character limit.  My favourite interoperability adage _"be strict in what you send, lenient in what you accept"_ would then imply that software which consumes FASTA must tolerate indefinite line lengths, while software that produces FASTA must write 80 character lines.
 
-The `uf` tool has a `--revert` option which does precisely this.  However the character limit recommendation was set [over 30(!) years ago](https://en.wikipedia.org/wiki/FASTA).  Any reasons for its existence have long since been obliterated by technological progress.  What's more, any FASTA consumer which fails to read longer lines _does_ violate the spec -- the limit is a *recommendation*, right?  In short, I suggest not reverting unfasta back to 'length-capped FASTA' and finding out if anything breaks.  In the unlike case that anything does, then that needs fixing.
+The `uf` tool has a `--revert` option which does precisely this.  However the character limit recommendation was set [over 30(!) years ago](https://en.wikipedia.org/wiki/FASTA).  Any reasons for its existence have long since been obliterated by technological progress.  What's more, any FASTA consumer which fails to read longer lines _does_ violate the spec -- the limit is a *recommendation*, right?  In short, I suggest not reverting unfasta back to 'length-capped FASTA' and finding out if anything breaks.  In the unlike case that it does, then that needs fixing.
 
 
 ### Pipes and filters architecture
@@ -247,5 +247,5 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 \*) Who makes this up?  NCBI specifies that multiple sequence identifiers must be separated by `|`, the same character that is used _within_ identifiers.  This makes it impossible to parse the list of identifiers without knowing the internal structure of every possible identifier -- instant forward incompatibility.  Why not use a different separator?  Why not reuse the `>`?
 
-\*\*) Yes, I have a peeve with that.  I'm baffled by the neglect for formalism when the whole purpose of the effort is enabling interchange of data.  When you set a standard, be explicit about it: make it identifiable, give it a **name**, give it a URI.  Don't put it on a page called "Web BLAST Page Options" or name it "Table 5" and put it in the _Examples and Demos_ section of a handbook.`</miff-mode>`
+\*\*) Yes, I have a peeve with that.  I'm baffled by the neglect for formalism when the whole purpose of the effort is enabling interchange of data.  When you set a standard, be explicit about it: make it identifiable, give it a **name**, give it a URI.  Don't call it "Web BLAST Page Options" or name it "Table 5" and put it in the _Examples and Demos_ section of a handbook.`</miff-mode>`
 
