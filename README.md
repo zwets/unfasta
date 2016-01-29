@@ -152,7 +152,7 @@ As in FASTA, an unfasta file contains a list of zero (does FASTA support this?) 
 
 #### Comply with BLAST practices
 
-Stick with the BLAST recommendations for FASTA header lines, sequence identifiers and data, as outlined in the [Web BLAST page options online help](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml), and the [NCBI Sequence Identifier specification as hidden in the bottom drawer of a locked filing cabinet stuck in a disused lavatory with a sign of the door saying "Beware of the Leopard"](http://www.goodreads.com/quotes/40705-but-the-plans-were-on-display-on-display-i-eventually), a copy of which I managed to find in [Table 5](http://ncbi.github.io/cxx-toolkit/pages/ch_demo#ch_demo.T5) in the [Examples and Demos chapter](http://ncbi.github.io/cxx-toolkit/pages/ch_demo) of the [NCBI C++ Toolkit Handbook](http://ncbi.github.io/cxx-toolkit/).[\*\*](#footnotes).
+Stick with the NCBI BLAST specifications for FASTA header lines, sequence identifiers and sequence data, as specified in the [NCBI BLAST specification aka "Web BLAST page options"](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml), and the [NCBI Sequence Identifier specification as hidden in the bottom drawer of a locked filing cabinet stuck in a disused lavatory with a sign of the door saying "Beware of the Leopard"](http://www.goodreads.com/quotes/40705-but-the-plans-were-on-display-on-display-i-eventually), aka ["Table 5"](http://ncbi.github.io/cxx-toolkit/pages/ch_demo#ch_demo.T5) in the Examples and Demos chapter of the NCBI C++ Toolkit Handbook.[\*\*](#footnotes).
 
 #### Requirements for filters
 
@@ -180,8 +180,8 @@ There are two reasons to support zero-length sequences.  Firstly, a zero-length 
 #### FASTA Specifications
 
 * [Wikipedia entry FASTA format](https://en.wikipedia.org/wiki/FASTA_format)
-* [NCBI BLAST specification](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml)
-* [NCBI Sequence Identifier convention](http://ncbi.github.io/cxx-toolkit/pages/ch_demo)
+* [NCBI BLAST specification (Web BLAST page options)](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml)
+* [NCBI Sequence Identifier specification (Table 5)](http://ncbi.github.io/cxx-toolkit/pages/ch_demo)
 * [BioStars Discussion](https://www.biostars.org/p/11254/)
 * [Genomatix overview of DNA Sequence Formats](https://www.genomatix.de/online_help/help/sequence_formats.html)
 * [Sequence Ontology Project](http://www.sequenceontology.org/)
@@ -243,9 +243,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-###### Footnotes
+### Footnotes
 
 \*) Who makes this up?  NCBI specifies that multiple sequence identifiers must be separated by `|`, the same character that is used _within_ identifiers.  This makes it impossible to parse the list of identifiers without knowing the internal structure of every possible identifier -- instant forward incompatibility.  Why not use a different separator?  Why not reuse the `>`?
 
-\*\*) Yes, I have a peeve with that.  I'm baffled by the neglect for formalism when the whole purpose of the effort is enabling interchange of data.  Set a standard and be explicit about it: make it identifiable, give it a NAME, give it a URI!  Don't put it on a web page titled "Web BLAST Page Options" or name it "Table 5" and put it in the "Examples and Demos" section of a handbook.`</grumble>`)
+\*\*) Yes, I have a peeve with that.  I'm baffled by the neglect for formalism when the whole purpose of the effort is enabling interchange of data.  When you set a standard, be explicit about it: make it identifiable, give it a **name**, give it a URI.  Don't put it on a page called "Web BLAST Page Options" or name it "Table 5" and put it in the _Examples and Demos_ section of a handbook.`</miff-mode>`
 
