@@ -64,6 +64,26 @@ If your natural preference is to work in a graphical user environment, then unfa
 Find [Unfasta on GitHub](http://github.com/zwets/unfasta).
 
 
+
+## Current unfasta tools
+
+|Tool|Description|
+|----|-----------|
+|`uf`| Convert FASTA to unfasta |
+|`uf-bare`| Filter the bare sequence data, strip the headers |
+|`uf-circut`| Take cuts from circular sequences, allowing wraparound |
+|`uf-cut`| Take cuts from linear sequences |
+|`uf-dress`| Undo the effect of uf-bare: add headers to a stream of bare sequence data |
+|`uf-drop`| Drop the initial N elements from a sequence |
+|`uf-headers`| Filter the headers only, drop the sequence data |
+|`uf-map`| Apply an operation to every line of sequence data in turn |
+|`uf-random`| Generate random sequences of DNA, RNA, amino acids (or indeed any other alphabet) |
+|`uf-rc`| Reverse complement a stream of unfasta |
+|`uf-take`| Take the initial N elements from every line of sequence data |
+|`uf-valid`| Validate an unfasta stream against its allowed alphabbet and NCBI defline conventions |
+
+
+
 ## Design principles
 
 ### The unfasta file format
@@ -84,12 +104,11 @@ As in FASTA, there can be an arbitrary number of sequences of arbitrary length. 
 
 ##### Header line syntax
 
-The header line must start with `>`, immediately followed by the _sequence identifier_.  The sequence identifier must contain no whitespace.  NCBI [specifies](http://ncbi.github.io/cxx-toolkit/pages/ch_demo#fasta-sequence-id-format) additional constraints on the sequence identifier, summarised [here](http://io.zwets.it/blast-cmdline-ref/#about-sequence-identifiers), and allows the sequence identifier to consist of multiple concatenated sequence identifiers[^1].  The sequence identifier may be followed by whitespace followed by a _sequence title_ consisting of arbitrary text.
+The header line must start with `>`, immediately followed by the _sequence identifier_.  The sequence identifier must contain no whitespace.  NCBI [specifies](http://ncbi.github.io/cxx-toolkit/pages/ch_demo#fasta-sequence-id-format) additional constraints on the sequence identifier, summarised [here](http://io.zwets.it/blast-cmdline-ref/#about-sequence-identifiers), and allows the sequence identifier to consist of multiple concatenated sequence identifiers[\*](#footnotes).  The sequence identifier may be followed by whitespace followed by a _sequence title_ consisting of arbitrary text.
 
 ##### Sequence line syntax
 
 The sequence line can syntactically contain any character except newline (which terminates it).  However to be semantically valid it must contain only characters defined by IUPAC, and listed in the [NCBI Blast Specification](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml).  Note that `uf` does not check the validity of the characters in the input FASTA file but copies them verbatim to stdout, removing only whitespace.  Use the `uf-valid` filter to check sequence validity.
-
 
 #### Unfasta *is* FASTA
 
@@ -125,7 +144,7 @@ This pipeline is efficient in more ways than you might realise:
 Apart from run-time efficiency, the pipes and filters approach of chaining simple tools together has benefits such as robustness, reusability, and simplicity in terms of cognitive load.  In a pipeline architecture it suffices to understand the individual filters in order to understand the whole -- which in turn is just another filter.  As in functional programming (that is, in the absence of side-effects), cognitive load goes up only linearly with the number of parts, not quadratically as it does in effectful systems where _N_ parts yield _N×N_ potential interactions to take into account.
 
 
-### Design decisions
+### Miscellaneous design decisions
 
 #### Lists of sequences
 
@@ -133,7 +152,7 @@ As in FASTA, an unfasta file contains a list of zero (does FASTA support this?) 
 
 #### Comply with BLAST practices
 
-@@@TODO@@@ stick with the BLAST recommendations for FASTA header lines, sequence identifiers and sequence data.
+Stick with the BLAST recommendations for FASTA header lines, sequence identifiers and data, as outlined in the [Web BLAST page options online help](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml), and the [NCBI Sequence Identifier specification as hidden in the bottom drawer of a locked filing cabinet stuck in a disused lavatory with a sign of the door saying "Beware of the Leopard"](http://www.goodreads.com/quotes/40705-but-the-plans-were-on-display-on-display-i-eventually), a copy of which I managed to find in [Table 5](http://ncbi.github.io/cxx-toolkit/pages/ch_demo#ch_demo.T5) in the [Examples and Demos chapter](http://ncbi.github.io/cxx-toolkit/pages/ch_demo) of the [NCBI C++ Toolkit Handbook](http://ncbi.github.io/cxx-toolkit/).[\*\*](#footnotes).
 
 #### Requirements for filters
 
@@ -152,32 +171,13 @@ Unfasta supports zero-length sequences. (Does FASTA support these? If not, how t
 
 There are two reasons to support zero-length sequences.  Firstly, a zero-length sequence could arise in the course of a pipeline, so we must at that point either error out (because it is [required](#requirements-for-filters) that filters produce valid unfasta, or output the zero-length sequence.  Secondly, zero-length sequences fit in well with the functional (algebraic) recursive definition of a sequence: a sequence is either the empty sequence, or an element followed by a sequence.
 
-#### Infinite sequences
 
-Infinite sequences are not relevant to unfasta.  Unfasta is a file format, and no finite file can represent an infinite sequence.  Inside a processing node (filter), an infinite sequence can exist, but it cannot be streamed out.  (Infinite sequences make sense for circular genomes or peptides.)
-
-## Current unfasta tools
-
-|Tool|Description|
-|----|-----------|
-|`uf`| Convert FASTA to unfasta |
-|`uf-bare`| Filter the bare sequence data, strip the headers |
-|`uf-circut`| Take cuts from circular sequences, allowing wraparound |
-|`uf-cut`| Take cuts from linear sequences |
-|`uf-dress`| Undo the effect of uf-bare: add headers to a stream of bare sequence data |
-|`uf-drop`| Drop the initial N elements from a sequence |
-|`uf-headers`| Filter the headers only, drop the sequence data |
-|`uf-map`| Apply an operation to every line of sequence data in turn |
-|`uf-random`| Generate random sequences of DNA, RNA, amino acids (or indeed any other alphabet) |
-|`uf-rc`| Reverse complement a stream of unfasta |
-|`uf-take`| Take the initial N elements from every line of sequence data |
-|`uf-valid`| Validate an unfasta stream against its allowed alphabbet and NCBI defline conventions |
 
 ## Miscellaneous
 
 ### Useful Links
 
-#### FASTA Specification
+#### FASTA Specifications
 
 * [Wikipedia entry FASTA format](https://en.wikipedia.org/wiki/FASTA_format)
 * [NCBI BLAST specification](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml)
@@ -245,5 +245,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ###### Footnotes
 
-[^1] Who makes this up?  NCBI specifies that multiple sequence identifiers must be separated by `|`, the same character that is used _within_ identifiers.  This makes it impossible to parse the list of identifiers without knowing the internal structure of every possible identifier -- instant forward incompatibility.  Why not use a different separator?  Why not reuse the `>`?
+\*) Who makes this up?  NCBI specifies that multiple sequence identifiers must be separated by `|`, the same character that is used _within_ identifiers.  This makes it impossible to parse the list of identifiers without knowing the internal structure of every possible identifier -- instant forward incompatibility.  Why not use a different separator?  Why not reuse the `>`?
+
+\*\*) Yes, I have a peeve with that.  I'm baffled by the neglect for formalism when the whole purpose of the effort is enabling interchange of data.  Set a standard and be explicit about it: make it identifiable, give it a NAME, give it a URI!  Don't put it on a web page titled "Web BLAST Page Options" or name it "Table 5" and put it in the "Examples and Demos" section of a handbook.`</grumble>`)
 
