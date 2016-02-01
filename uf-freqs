@@ -1,0 +1,92 @@
+#!/bin/sh
+#
+#  uf-freqs - Count frequencies in unfasta files
+#  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  Created on 2016-01-27
+
+# Function to exit this script with an error message on stderr
+err_exit() {
+	echo "$(basename "$0"): $*" >&2
+	exit 1
+}
+
+# Function to show usage information and exit
+usage_exit() {
+	echo "
+Usage: $(basename $0) [OPTIONS] [FILE] ...
+
+  Count frequencies of elements in each sequence in each unfasta FILE and write
+  to standard output.  If no FILE is present or when FILE is '-', read standard
+  input.
+
+  Options
+   -b|--bare          Do not output the headers, only the data
+   -l|--length-only   Length of sequence only, no frequencies per element
+   -t|--totals        Totals across all sequences at bottom
+" >&2
+	exit ${1:-1}
+}
+
+# Parse options
+
+BARE=0
+LENGTH_ONLY=0
+TOTALS=0
+
+while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\).*')" = "-" ]; do
+	case $1 in
+	-b|--bare)
+		BARE=1
+		;;
+	-l|--length*)
+		LENGTH_ONLY=1
+		;;
+	-t|--totals)
+		TOTALS=1
+		;;
+	-h|--help)
+		usage_exit 0
+		;;
+	*) usage_exit
+		;;
+	esac
+	shift
+done
+
+awk -b -O -v P="$(basename "$0")" -v BARE=$BARE -v LENGTH_ONLY=$LENGTH_ONLY -v TOTALS=$TOTALS '
+BEGIN { PROCINFO["sorted_in"] = "@ind_str_asc" }
+NR%2==1 && !BARE 
+NR%2==0 {
+	for (i=1; i<=length($0); ++i) freqs[toupper(substr($0,i,1))] += 1
+	printf length($0)
+	if (!LENGTH_ONLY) for (j in freqs) printf " " j "=" freqs[j]
+	printf "\n"
+	if (TOTALS) {
+		for (j in freqs) totals[j] += freqs[j]
+		grand_total += length($0)
+	}
+}
+END { 
+	if (TOTALS) {
+		if (!BARE) print ">TOTALS"
+		printf grand_total;
+		if (!LENGTH_ONLY) for (j in totals) printf " " j "=" totals[j]
+		printf "\n"
+	}
+} 
+' "$@"
+

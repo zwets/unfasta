@@ -74,11 +74,13 @@ Find [Unfasta on GitHub](http://github.com/zwets/unfasta).
 |`uf-circut`| Cut sections out of circular sequences, allowing wraparound |
 |`uf-cut`| Cut sections from linear sequences |
 |`uf-dress`| Undo the effect of `uf-bare`: add headers to a stream of bare sequence data |
-|`uf-drop`| Drop the initial N elements from a sequence, or drop elements until N are left |
+|`uf-drop`| Count the frequencies of elements in sequences |
+|`uf-freqs`| Drop the initial N elements from a sequence, or drop elements until N are left |
 |`uf-headers`| Strip the sequence data, output only the sequence headers |
 |`uf-map`| Apply an operation to every line of sequence data in turn |
 |`uf-random`| Generate random sequences of DNA, RNA, amino acids, or any other alphabet |
 |`uf-rc`| Reverse and/or complement a stream of unfasta |
+|`uf-select`| Select sequences |
 |`uf-take`| Take the initial N elements from a sequence, or take elements until N are left |
 |`uf-valid`| Validate an unfasta stream against its allowed alphabet and NCBI conventions |
 

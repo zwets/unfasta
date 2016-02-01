@@ -1,0 +1,67 @@
+#!/bin/sh
+#
+#  uf-select - Select sequences from an unfasta file
+#  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  Created on 2016-01-27
+
+# Function to exit this script with an error message on stderr
+err_exit() {
+	echo "$(basename "$0"): $*" >&2
+	exit 1
+}
+
+# Function to show usage information and exit
+usage_exit() {
+	echo "
+Usage: $(basename $0) [OPTIONS] [FILE] ...
+
+  Select sequences from unfasta FILEs and write to standard output.  If no FILE
+  is present or when FILE is '-', read standard input.
+
+  Options
+   -n|--nth N[,..]  Select the nth sequence(s) for each file.
+" >&2
+	exit ${1:-1}
+}
+
+# Parse options
+
+unset NTH
+
+while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\).*')" = "-" ]; do
+	case $1 in
+	--nth=*)
+		NTH=${1#--nth=}
+		;;
+	-n|--nth)
+		shift
+		NTH=$1
+		;;
+	-h|--help)
+		usage_exit 0
+		;;
+	*) usage_exit
+		;;
+	esac
+	shift
+done
+
+awk -b -O -v P="$(basename "$0")" -v NTH=$NTH '
+BEGIN { if (NTH) split(NTH,lines,/,/) }
+{ if (NTH) for (x in lines) if (int((NR+1)/2) == lines[x]) print }
+' "$@"
+
