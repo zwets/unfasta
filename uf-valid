@@ -164,7 +164,7 @@ awk -b -O -v P="$(basename "$0")" -v WRONG="[^$ALLOW]" -v H=$VAL_HEADERS -v Q=$Q
 		print P ": no FASTA header found at line " NR
 		ERR = 1
 	} 
-	else if ( H && HDR !~ /^>[[:alpha:]]+\|\w+(\|\w+)*(\s+.*)?$/ ) {  # rudimentary syntax check of header
+	else if ( H && HDR !~ /^>[[:alpha:]]+\|[[:alnum:]._]+(\|[[:alnum:]._]+)*\|?(\s+.*)?$/ ) {  # rudimentary syntax check of header
 		print P ": invalid header syntax at line " NR ": " HDR > "/dev/stderr"
 		ERR = 1
 	}
