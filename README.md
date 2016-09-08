@@ -117,7 +117,7 @@ The sequence line can syntactically contain any character except newline (which 
 
 Technically, every unfasta file is a also a FASTA file.  None of the *de facto* specifications (see the [links below](#fasta-specification)) of the FASTA format **mandate** a maximum line length.  Several **recommend** an 80 or 120 character limit.  My favourite interoperability adage _"be strict in what you send, lenient in what you accept"_ would then imply that software which consumes FASTA must tolerate indefinite line lengths, while software that produces FASTA must write 80 character lines.
 
-The `uf` tool has a `--revert` option which does precisely this.  However the character limit recommendation was set [over 30(!) years ago](https://en.wikipedia.org/wiki/FASTA).  Any reasons for its existence have long since been obliterated by technological progress.  What's more, any FASTA consumer which fails to read longer lines _does_ violate the spec -- the limit is a *recommendation*, right?  In short, I suggest not reverting unfasta back to 'length-capped FASTA' and finding out if anything breaks.  In the unlike case that it does, then that needs fixing.
+The `uf` tool has a `--revert` option which does precisely this.  However the character limit recommendation was set [over 30(!) years ago](https://en.wikipedia.org/wiki/FASTA).  Any reasons for its existence have long since been obliterated by technological progress.  What's more, any FASTA consumer which fails to read longer lines _does_ violate the spec -- the limit is a *recommendation*, right?  In short, I suggest not reverting unfasta back to 'length-capped FASTA' and finding out if anything breaks.  In the unlikely case that it does, then that needs fixing.
 
 
 ### Pipes and filters architecture
@@ -248,7 +248,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ### Footnotes
 
-\*) Who makes this up?  NCBI specifies that multiple sequence identifiers must be separated by `|`, the same character that is used _within_ identifiers.  This makes it impossible to parse the list of identifiers without knowing the internal structure of every possible identifier -- instant forward incompatibility.  Why not use a different separator?  Why not reuse the `>`?
+\*) Who makes this up?  NCBI specifies that multiple sequence identifiers must be separated by `|`, the same character that is used _within_ identifiers.  This makes it impossible to parse the list of identifiers without knowing the internal structure of every possible identifier ahead of time -- instant forward incompatibility.  Why not use a different separator?  Why not reuse the `>`?
 
 \*\*) Yes, I have a peeve with that.  I'm baffled by the neglect for formalism when the whole purpose of the effort is enabling interchange of data.  When you set a standard, be explicit about it: make it identifiable, give it a **name**, give it a URI.  Don't call it "Web BLAST Page Options" or name it "Table 5" and put it in the _Examples and Demos_ section of a handbook.`</miff-mode>`
 
