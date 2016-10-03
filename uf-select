@@ -34,6 +34,7 @@ Usage: $(basename $0) [OPTIONS] [FILE] ...
 
   Options
    -n|--nth N[,..]  Select the nth sequence(s) for each file.
+   -g|--grep REGEX  Select the sequence(s) whose header matches REGEX.
 " >&2
 	exit ${1:-1}
 }
@@ -51,6 +52,13 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\).*')" = "-" ]; do
 		shift
 		NTH=$1
 		;;
+	--grep=*)
+		REGEX=${1#--grep=}
+		;;
+	-g|--grep)
+		shift
+		REGEX=$1
+		;;
 	-h|--help)
 		usage_exit 0
 		;;
@@ -59,6 +67,8 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\).*')" = "-" ]; do
 	esac
 	shift
 done
+
+[ -z "$REGEX" ] || err_exit "option -g,--grep not implemented"
 
 awk -b -O -v P="$(basename "$0")" -v NTH=$NTH '
 BEGIN { if (NTH) split(NTH,lines,/,/) }

@@ -47,6 +47,8 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
 	shift
 done
 
+# @TODO@: look at https://github.com/illusori/bash-tap.git for testing.
+
 err_exit "
 
   sole hand in spring forest
