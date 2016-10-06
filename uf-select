@@ -27,21 +27,25 @@ err_exit() {
 # Function to show usage information and exit
 usage_exit() {
 	echo "
-Usage: $(basename $0) [OPTIONS] [FILE] ...
+Usage: $(basename $0) [OPTIONS|NUMBERS|REGEX] [FILE] ...
 
   Select sequences from unfasta FILEs and write to standard output.  If no FILE
   is present or when FILE is '-', read standard input.
 
-  Options
+  OPTIONS
    -n|--nth N[,..]  Select the nth sequence(s) for each file.
    -g|--grep REGEX  Select the sequence(s) whose header matches REGEX.
+
+  As a convenience, when no option is specified then if the first argument 
+  parses as a valid list of NUMBERS then --nth is assumed, else --grep is
+  assumed.
 " >&2
 	exit ${1:-1}
 }
 
 # Parse options
 
-unset NTH
+unset NTH REGEX
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\).*')" = "-" ]; do
 	case $1 in
@@ -68,10 +72,36 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\).*')" = "-" ]; do
 	shift
 done
 
-[ -z "$REGEX" ] || err_exit "option -g,--grep not implemented"
+# Handle option-less case
 
-awk -b -O -v P="$(basename "$0")" -v NTH=$NTH '
-BEGIN { if (NTH) split(NTH,lines,/,/) }
-{ if (NTH) for (x in lines) if (int((NR+1)/2) == lines[x]) print }
-' "$@"
+if [ -z "$NTH" ] && [ -z "$GREP" ]; then
+	[ -n "$1" ] || usage_exit
+	if expr "$1" : '\([0-9]\+\(,[0-9]\+\)*$\)' >/dev/null; then
+		NTH="$1"
+	else
+		REGEX="$1"
+	fi
+	shift
+fi
+
+# Check options
+
+[ -z "$NTH" ] || [ -z "$REGEX" ] || err_exit "options --nth and --grep cannot be used together"
+[ -z "$NTH" ] || expr "$NTH" : '\([0-9]\+\(,[0-9]\+\)*$\)' >/dev/null || err_exit "not a valid number list: $NTH"
+
+# Do the work
+
+if [ -n "$NTH" ]; then
+	#awk -b -O -v NTH=$NTH 'BEGIN { split(NTH,lines,/,/) } int((NR+1)/2) in lines' "$@"
+	awk -b -O -v NTH=$NTH '
+	BEGIN { split(NTH,lines,/,/) } 
+	{ for (x in lines) if (int((NR+1)/2) == lines[x]) print }
+	' "$@"
+elif [ -n "$REGEX" ]; then
+	awk -b -O '
+        NR % 2 == 1 && /'$REGEX'/ { print; getline; print }
+	' "$@"
+else
+	usage_exit
+fi
 
