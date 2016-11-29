@@ -36,12 +36,11 @@ Usage: $(basename $0) [OPTIONS] [FILE]
   if no FILE is present.
 
   The computed hash value is invariant to changes in the sequence headers.
-  It is sensitive to reordering of the sequences in the file, unless option
-  -r|--reorderable is present.
+  It is sensitive to changes in the order of sequences in the FILE.  Pipe
+  input through uf-sort to compensate for differences in sequence order.
  
   OPTIONS
    -a|--algo ALG     Use algorithm md5/sha1/224/256/384/512, default: $ALGO
-   -r|--reorderable  Make hash insensitive to reordering of sequences in FILE
 " >&2
 	exit ${1:-1}
 }
@@ -57,9 +56,6 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\)..*')" = "-" ]; do
 	-a|--algo*)
 		shift
 		ALGO=$1
-		;;
-	-r|--reorderable)
-		REORDERABLE=1
 		;;
 	-h|--help)
 		usage_exit 0
@@ -82,13 +78,5 @@ FILE="-"
 
 # Do the work
 
-awk -b -O 'NR % 2 == 0' "$FILE" | {
-	if [ -n "$REORDERABLE" ]; then
-		# The trick for reorderability is to hash the individual sequences,
-		# sort the result, and hash that.
-		while read S; do 
-			echo "$S" | $HASH_PGM | cut -d' ' -f1
-		done | sort
-	fi } | 
-	$HASH_PGM | cut -d' ' -f1
+awk -b -O 'NR % 2 == 0' "$FILE" | $HASH_PGM | cut -d' ' -f1
 
