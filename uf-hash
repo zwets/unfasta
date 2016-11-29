@@ -1,0 +1,94 @@
+#!/bin/sh
+#
+#  uf-hash - Compute a hash over the sequence content of an unfasta file
+#  Copyright (C) 2016  Marco van Zwetselaar <io@zwets.it>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  Part of https://github.com/zwets/unfasta
+
+# Defaults
+ALGO="md5"
+
+# Function to exit this script with an error message on stderr
+err_exit() {
+	echo "$(basename "$0"): $*" >&2
+	exit 1
+}
+
+# Function to show usage information and exit
+usage_exit() {
+	echo "
+Usage: $(basename $0) [OPTIONS] [FILE]
+
+  Computes a hash over the sequence content of unfasta file FILE, or stdin
+  if no FILE is present.
+
+  The computed hash value is invariant to changes in the sequence headers.
+  It is sensitive to reordering of the sequences in the file, unless option
+  -r|--reorderable is present.
+ 
+  OPTIONS
+   -a|--algo ALG     Use algorithm md5/sha1/224/256/384/512, default: $ALGO
+   -r|--reorderable  Make hash insensitive to reordering of sequences in FILE
+" >&2
+	exit ${1:-1}
+}
+
+# Parse options
+
+unset REORDERABLE
+while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\)..*')" = "-" ]; do
+	case $1 in
+	--algo=*)
+		ALGO=${1#--algo=}
+		;;
+	-a|--algo*)
+		shift
+		ALGO=$1
+		;;
+	-r|--reorderable)
+		REORDERABLE=1
+		;;
+	-h|--help)
+		usage_exit 0
+		;;
+	*) usage_exit
+		;;
+	esac
+	shift
+done
+
+# Check options and arguments
+
+case $ALGO in md5|sha1|sha224|sha256|sha384|sha512) ;; *) err_exit "unknown algorithm: $ALGO" ;; esac
+HASH_PGM="/usr/bin/${ALGO}sum"
+[ -x "$HASH_PGM" ] || err_exit "hash program not found: $HASH_PGM (missing coreutils?)"
+
+FILE="-"
+[ $# -eq 0 ] || FILE="$1"
+[ $# -lt 2 ] || usage_exit
+
+# Do the work
+
+awk -b -O 'NR % 2 == 0' "$FILE" | {
+	if [ -n "$REORDERABLE" ]; then
+		# The trick for reorderability is to hash the individual sequences,
+		# sort the result, and hash that.
+		while read S; do 
+			echo "$S" | $HASH_PGM | cut -d' ' -f1
+		done | sort
+	fi } | 
+	$HASH_PGM | cut -d' ' -f1
+
