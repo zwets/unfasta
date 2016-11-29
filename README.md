@@ -82,6 +82,7 @@ Find [Unfasta on GitHub](http://github.com/zwets/unfasta).
 |`uf-random`| Generate random sequences of DNA, RNA, amino acids, or any other alphabet |
 |`uf-rc`| Reverse and/or complement a stream of unfasta |
 |`uf-select`| Select sequences by position or by grepping their header for a regular expression |
+|`uf-sort`| Sort sequences in order of decreasing size, breaking ties alphabetically |
 |`uf-take`| Take the initial N elements from a sequence, or take elements until N are left |
 |`uf-valid`| Validate an unfasta stream against its allowed alphabet and NCBI conventions |
 
