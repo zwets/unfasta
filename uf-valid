@@ -58,7 +58,7 @@ err_exit() {
 # Function to show usage information and exit
 usage_exit() {
 	echo "
-Usage: $(basename $0) [OPTIONS] [FILE] ...
+Usage: $(basename $0) [OPTIONS] [FILE ...]
 
   Validate the sequences in each FILE against the allowed alphabet.  If no FILE
   is present or FILE is '-', read from standard input.  Only valid sequences are
@@ -98,7 +98,7 @@ QUIET=0
 
 # Parse options
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
 	case $1 in
 	--allow=*)
 		ALLOW="${ALLOW}${1#"--allow="}"

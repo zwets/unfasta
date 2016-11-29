@@ -27,7 +27,7 @@ err_exit() {
 # Function to show usage information and exit
 usage_exit() {
 	echo "
-Usage: $(basename $0) [OPTIONS|NUMBERS|REGEX] [FILE] ...
+Usage: $(basename $0) [OPTIONS|NUMBERS|REGEX] [FILE ...]
 
   Select sequences from unfasta FILEs and write to standard output.  If no FILE
   is present or when FILE is '-', read standard input.
@@ -65,6 +65,9 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\).*')" = "-" ]; do
 		;;
 	-h|--help)
 		usage_exit 0
+		;;
+	-)
+		break
 		;;
 	*) usage_exit
 		;;

@@ -37,7 +37,7 @@ Usage: $(basename $0) [OPTIONS] [FILE] ...
 
 # Parse options
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
 	case $1 in
 	--help)
 		usage_exit 0

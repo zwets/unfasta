@@ -46,7 +46,7 @@ Usage: $(basename $0) [OPTIONS] [FILE] ...
 
 unset HDRSFILE FORCE
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
 	case $1 in
 	-w)	shift
 		[ $# -ge 1 ] || usage_exit

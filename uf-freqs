@@ -47,7 +47,7 @@ BARE=0
 LENGTH_ONLY=0
 TOTALS=0
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\).*')" = "-" ]; do
+while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\)..*')" = "-" ]; do
 	case $1 in
 	-b|--bare)
 		BARE=1
