@@ -44,7 +44,7 @@ Usage: $(basename $0) [OPTIONS] [FILE] ...
   $ uf file.fna | uf-bare | ..processing.. | uf-dress -r <(uf file.fna | uf-headers)
 
   See also: 'uf-map' which implements this idiom in a single command.
-"
+" >&2
 	exit ${1:-1}
 }
 

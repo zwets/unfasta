@@ -37,20 +37,20 @@ err_exit() {
 
 # Function to show usage information and exit
 usage_exit() {
-	echo
-	echo "Usage: $(basename $0) [OPTIONS] [FILE] ..."
-	echo
-	echo "  Write to standard output the reverse complement of every sequence in each FILE."
-	echo "  If no FILE is present or FILE is '-', read from standard input."
-	echo 
-	echo "  Options"
-	echo "   -r|--reverse-only     Reverse only, do not complement."
-	echo "   -c|--complement-only  Complement only, do not reverse."
-	echo "   -m|--mark[-header]    Document operation by attaching '(uf:...)' to headers."
-	echo 
-	echo "  Case is preserved.  Will also work for the degenerate nucleotide letters."
-	echo "  E.g. complement of Y (pyrimidine, T/C) is R (purine, A/T)."
-	echo
+	echo "
+Usage: $(basename $0) [OPTIONS] [FILE] ...
+
+  Write to standard output the reverse complement of every sequence in each FILE.
+  If no FILE is present or FILE is '-', read from standard input.
+
+  Options
+   -r|--reverse-only     Reverse only, do not complement.
+   -c|--complement-only  Complement only, do not reverse.
+   -m|--mark[-header]    Document operation by attaching '(uf:...)' to headers.
+
+  Case is preserved.  Will also work for the degenerate nucleotide letters.
+  E.g. complement of Y (pyrimidine, T/C) is R (purine, A/T).
+" >&2
 	exit ${1:-1}
 }
 

@@ -26,19 +26,19 @@ err_exit() {
 
 # Function to show usage information and exit
 usage_exit() {
-	echo
-	echo "Usage: $(basename $0) [OPTIONS] [FILE] ..."
-	echo
-	echo "  Output only the bare sequences from each FILE to stanard output, dropping the"
-	echo "  headers.  If no FILE is present or FILE is '-', read from standard input."
-	echo
-	echo "  Options"
-	echo "   -w HDRSFILE   Write the headers to HDRSFILE, which must not already exist."
-	echo "   -f|--force    Overwrite HDRSFILE if it exists."
-	echo 
-	echo "  By default headers go to /dev/null.  Use option -w to store them in a file."
-	echo "  The file can be merged back in with bare sequences using 'uf-dress'."
-	echo
+	echo "
+Usage: $(basename $0) [OPTIONS] [FILE] ...
+
+  Output only the bare sequences from each FILE to standard output, dropping the
+  headers.  If no FILE is present or FILE is '-', read from standard input.
+
+  Options
+   -w HDRSFILE   Write the headers to HDRSFILE, which must not already exist.
+   -f|--force    Overwrite HDRSFILE if it exists.
+
+  By default headers go to /dev/null.  Use option -w to store them in a file.
+  The file can be merged back in with bare sequences using 'uf-dress'.
+" >&2
 	exit ${1:-1}
 }
 

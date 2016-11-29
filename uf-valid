@@ -57,33 +57,33 @@ err_exit() {
 
 # Function to show usage information and exit
 usage_exit() {
-	echo
-	echo "Usage: $(basename $0) [OPTIONS] [FILE] ..."
-	echo
-	echo "  Validate the sequences in each FILE against the allowed alphabet.  If no FILE"
-	echo "  is present or FILE is '-', read from standard input.  Only valid sequences are"
-	echo "  copied to standard output.  For invalid sequences, an error message is printed"
-	echo "  to standard error."
-	echo 
-	echo "  Options"
-	echo "   -a|--allow CHARS  Validate sequences against the alphabet consisting of CHARS."
-	echo "                     May be specified in addition to the synonyms listed below."
-	echo "   -i|--ignore-case  Ignore case for allowed CHARS (default for the synonyms)."
-	echo "   -v|--headers      Validate the syntax of the headers against NCBI conditions."
-	echo "   -s|--stop         Stop processing after the first invalid sequence."
-	echo "   -k|--keep         Do not drop invalid sequences but copy them to standard out."
-	echo "   -q|--quiet        Do not copy standard input to standard output."
-	echo
-	echo "  Synonyms for the usual alphabets (mutually exclusive):"
-	echo "   --dna             Equivalent to: -i -a '$DNA_ALPHABET'"
-	echo "   --rna             Equivalent to: -i -a '$RNA_ALPHABET'"
-	echo "   --nucl            Equivalent to: -i -a '$NUCL_ALPHABET'"
-	echo "   --amino|--prot    Equivalent to: -i -a '$AMINO_ALPHABET'"
-	echo
-	echo "  CAVEAT: when using --allow with symbols other than characters: the current"
-	echo "  implementation is a simple regex search for the complement of the alphabet,"
-	echo "  so symbols which are regex meta-characters like ., ?, and * need escaping."
-	echo 
+	echo "
+Usage: $(basename $0) [OPTIONS] [FILE] ...
+
+  Validate the sequences in each FILE against the allowed alphabet.  If no FILE
+  is present or FILE is '-', read from standard input.  Only valid sequences are
+  copied to standard output.  For invalid sequences, an error message is printed
+  to standard error.
+
+  Options
+   -a|--allow CHARS  Validate sequences against the alphabet consisting of CHARS.
+                     May be specified in addition to the synonyms listed below.
+   -i|--ignore-case  Ignore case for allowed CHARS (default for the synonyms).
+   -v|--headers      Validate the syntax of the headers against NCBI conditions.
+   -s|--stop         Stop processing after the first invalid sequence.
+   -k|--keep         Do not drop invalid sequences but copy them to standard out.
+   -q|--quiet        Do not copy standard input to standard output.
+
+  Synonyms for the usual alphabets (mutually exclusive):
+   --dna             Equivalent to: -i -a '$DNA_ALPHABET'
+   --rna             Equivalent to: -i -a '$RNA_ALPHABET'
+   --nucl            Equivalent to: -i -a '$NUCL_ALPHABET'
+   --amino|--prot    Equivalent to: -i -a '$AMINO_ALPHABET'
+
+  CAVEAT: when using --allow with symbols other than characters: the current
+  implementation is a simple regex search for the complement of the alphabet,
+  so symbols which are regex meta-characters like ., ?, and * need escaping.
+" >&2
 	exit ${1:-1}
 }
 

@@ -26,20 +26,20 @@ err_exit() {
 
 # Function to show usage information and exit
 usage_exit() {
-	echo
-	echo "Usage: $(basename $0) [OPTIONS] OPERATION [FILE] ..."
-	echo
-	echo "  Feed every sequence in FILE to OPERATION's standard input.  When no FILE"
-	echo "  is  present or FILE is '-', read from standard input.  Output is the output"
-	echo "  of OPERATION interspersed with every header from the input."
-	echo
-	echo "  Note that OPERATION is started once, not invoked separately for each line."
-	echo "  It must process every line coming in on its standard input separately."
-	echo
-	echo "  Example"
-	echo "  \$ uf-map 'tr [:upper:] [:lower:]'  # convert all seqs to lower case"
-	echo "  \$ uf-map 'sed -re s,^.{12},,'      # drop initial 12 elements from each"
-	echo 
+	echo "
+Usage: $(basename $0) [OPTIONS] OPERATION [FILE] ...
+
+  Feed every sequence in FILE to OPERATION's standard input.  When no FILE
+  is  present or FILE is '-', read from standard input.  Output is the output
+  of OPERATION interspersed with every header from the input.
+
+  Note that OPERATION is started once, not invoked separately for each line.
+  It must process every line coming in on its standard input separately.
+
+  Example
+  \$ uf-map 'tr [:upper:] [:lower:]'  # convert all seqs to lower case
+  \$ uf-map 'sed -re s,^.{12},,'      # drop initial 12 elements from each
+" >&2
 	exit ${1:-1}
 }
 
