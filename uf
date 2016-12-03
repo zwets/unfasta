@@ -31,16 +31,17 @@ Usage: $(basename $0) [OPTIONS] [FILE] ...
   
   Convert FILEs to unfasta format and write to standard output.  With no
   FILE or when FILE is '-', read standard input.  Unfasta is FASTA without
-  the pesky line breaks.  All sequences become one-liners.
+  the pesky line breaks.
  
   Options
    -r, --revert  Revert unfasta to FASTA. 
-        Break sequences at 80 chars.  However note that there is no need to
-        revert unfasta 'back' to FASTA, as every unfasta file IS a FASTA
-        file.  The 80 char limit is recommended only.
+        Break sequences at 80 chars.  However note that there is no need
+        to revert unfasta 'back' to FASTA.  Every unfasta file is a valid
+        FASTA file as the 80 char limit is a recommendation only.
 
   This program strips whitespace including line breaks from the sequence
-  lines, but leaves everything else intact.  Use uf-valid for validation.
+  lines, but leaves everything else intact.  It performs no validation on
+  the header or data lines.  See uf-valid.
 
   More information about the unfasta suite at http://io.zwets.it/unfasta.
 " >&2

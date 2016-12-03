@@ -5,7 +5,7 @@ _Command-line pipes and filters for genomic sequence data._
 
 ## Introduction
 
-[Unfasta](http://github.com/zwets/unfasta) is a suite of command-line utilities for working with sequence data.
+[Unfasta](http://io.zwets.it/unfasta) is a suite of command-line utilities for working with sequence data.
 
 The rationale behind unfasta is to have the ability to process genomic sequence data using simple standard utilities like `grep`, `cut` and `head`, in the common [pipes and filters style](http://www.dossier-andreas.net/software_architecture/pipe_and_filter.html) of Unix and GNU.
 
@@ -61,7 +61,7 @@ Unfasta isn't intended as the be-all and end-all of genomic sequence processing.
 
 If your natural preference is to work in a graphical user environment, then unfasta may be just the occasion to get out of your comfort zone and discover the beauty and power of the command line.
 
-Find [Unfasta on GitHub](http://github.com/zwets/unfasta).
+Find [Unfasta on GitHub](https://github.com/zwets/unfasta).
 
 
 
