@@ -16,22 +16,28 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-#  Created on 2016-01-18
+#  Part of https://github.com/zwets/unfasta
 
 # Function to exit this script with an error message on stderr
 err_exit() {
-	echo "$(basename "$0"): $*" >&2
-	exit 1
+    echo "$(basename "$0"): $*" >&2
+    exit 1
 }
 
 # Function to show usage information and exit
 usage_exit() {
-	echo "
+    echo "
 Usage: $(basename $0) [OPTIONS] OPERATION [FILE] ...
 
   Feed every sequence in FILE to OPERATION's standard input.  When no FILE
-  is  present or FILE is '-', read from standard input.  Output is the output
-  of OPERATION interspersed with every header from the input.
+  is  present or FILE is '-', read from standard input.  Write to standard
+  output the output of OPERATION applied to each sequence, interspersed
+  with every header from the input.  With option -t apply OPERATION to the
+  sequence titles instead, passing the sequence data straight through.
+
+  OPTIONS
+    -t, --titles  map OPERATION over the sequence headers instead of of data
+    -h, --help    this help
 
   Note that OPERATION is started once, not invoked separately for each line.
   It must process every line coming in on its standard input separately.
@@ -40,20 +46,24 @@ Usage: $(basename $0) [OPTIONS] OPERATION [FILE] ...
   \$ uf-map 'tr [:upper:] [:lower:]'  # convert all seqs to lower case
   \$ uf-map 'sed -re s,^.{12},,'      # drop initial 12 elements from each
 " >&2
-	exit ${1:-1}
+    exit ${1:-1}
 }
 
 # Parse options
 
+unset TITLES
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
-	case $1 in
-	-h|--help)
-		usage_exit 0
-		;;
-	*) usage_exit
-		;;
-	esac
-	shift
+    case $1 in
+    -t|--title*)
+        TITLES=1
+        ;;
+    -h|--help)
+        usage_exit 0
+        ;;
+    *) usage_exit
+        ;;
+    esac
+    shift
 done
 
 # Parse arguments
@@ -62,39 +72,44 @@ done
 OPERATION="$1"
 shift
 
-# Do it 
+# Making this work produced two nice false starts: a race and a deadlock
 
-# FAIL 1: using pipe within awk
-# Fails because of race: external operation is buffering its output, so lines do not come out in the right order.
-#awk -b -O -v OPER="sh -c '$OPERATION'" '
-#	NR%2==1 { print }
-#	NR%2==0 { print | OPER }
-#	{ fflush() }' "$@"
+# FAIL 1: using pipe inside awk (use the awk pipe feature)
+# Fails because of race: external OPERATION is buffering its output,
+# so lines do not come out in the right order, not even with flush.
+# awk -b -O -v OPER="sh -c '$OPERATION'" '
+#    NR%2==1 { print }
+#    NR%2==0 { print | OPER }
+#    { fflush() }' "$@"
 
 # FAIL 2: using a FIFO between uf-bare and uf-dress
 # Fails because of deadlock: uf-bare blocks on FIFO until uf-dress consumes,
 # but uf-dress is waiting for standard input before consuming from FIFO.
-#FIFO="/tmp/$(basename "$0").$$"
-#mkfifo "$FIFO" 
-#./uf-bare -f -w "$FIFO" | ./uf-dress -r "$FIFO"
-#RETVAL=$?
-#rm -f $FIFO
+# FIFO="/tmp/$(basename "$0").$$" && mkfifo "$FIFO" 
+# ./uf-bare -f -w "$FIFO" | ./uf-dress -r "$FIFO"
 
-# Maybe using paste to pull things together?
+# ATTEMPT 3: using paste to merge OPERATION output and FIFO
 
 # Set pipefail to have the errorcode of the rightmost failing filter (OPERATION)
-[ -z "$BASH" ] set +o pipefail
+[ -z "$BASH" ] || set +o pipefail
 
-# Make a FIFO to hold the headers and from which paste merges them with OPERATION standard output
+# Make a FIFO to hold the straight-through lines, from which paste will merge them with OPERATION output
 FIFO="/tmp/$(basename "$0").$$"
 mkfifo "$FIFO" 
 
-# Run the pipeline
-awk -b -O -v FIFO="$FIFO" 'NR%2==1 { print > FIFO }; NR%2==0' "$@" | $OPERATION | paste -d '\n' "$FIFO" -
-RETVAL=$?
+# The pipeline splits the lines between FIFO and OPERATION, then paste merges hem
+if [ -z "$TITLES" ]; then LHS="$FIFO"; RHS="-"; else LHS="-"; RHS="$FIFO"; fi
 
-# Clean up - @TODO@ set a shell trap, is cleaner
+awk -b -O -v FIFO="$FIFO" -v ONE="${TITLES:-0}" '
+        (NR+ONE)%2==1 { print > FIFO }; 
+        (NR+ONE)%2==0' "$@" \
+    | $OPERATION \
+    | paste -d '\n' "$LHS" "$RHS"
+
+# Hold on to RETVAL as rm will reset exit status
+RETVAL=$?
 rm -f $FIFO
 
 exit $RETVAL
 
+# vim: sw=4:ts=4:ai:si:et
