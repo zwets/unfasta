@@ -20,31 +20,31 @@
 
 # Function to exit this script with an error message on stderr
 err_exit() {
-	echo "$(basename "$0"): $*" >&2
-	exit 1
+    echo "$(basename "$0"): $*" >&2
+    exit 1
 }
 
 # Function to show usage information and exit
 usage_exit() {
-	echo
-	echo "Usage: $(basename $0) [OPTIONS] [FILE] ..."
-	echo
-	echo "  Convert FILEs to unfasta format and write to standard output.  With no FILE"
-	echo "  or when FILE is '-', read standard input.  Unfasta is FASTA without the pesky"
-	echo "  line breaks mucking up the sequences."
-	echo
-	echo "  Options"
-	echo "   -r|--revert  Revert unfasta to FASTA, that is break sequences at 80 chars."
-	echo "        However note that there is no need to revert unfasta 'back' to FASTA."
-	echo "        Every unfasta file IS a FASTA file: the 80 char limit is recommended"
-	echo "        only, and additionally stems from 1985."
-	echo
-	echo "  This program strips whitespace including line breaks from the sequence lines,"
-	echo "  but leaves everything else intact.  Use uf-validate for validation."
-	echo
-	echo "  More information about the unfasta suite at http://io.zwets.it/unfasta."
-	echo
-	exit ${1:-1}
+    echo "
+Usage: $(basename $0) [OPTIONS] [FILE] ...
+  
+  Convert FILEs to unfasta format and write to standard output.  With no
+  FILE or when FILE is '-', read standard input.  Unfasta is FASTA without
+  the pesky line breaks.  All sequences become one-liners.
+ 
+  Options
+   -r, --revert  Revert unfasta to FASTA. 
+        Break sequences at 80 chars.  However note that there is no need to
+        revert unfasta 'back' to FASTA, as every unfasta file IS a FASTA
+        file.  The 80 char limit is recommended only.
+
+  This program strips whitespace including line breaks from the sequence
+  lines, but leaves everything else intact.  Use uf-valid for validation.
+
+  More information about the unfasta suite at http://io.zwets.it/unfasta.
+" >&2
+    exit ${1:-1}
 }
 
 # Parse options
@@ -52,27 +52,27 @@ usage_exit() {
 unset REVERT
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
-	case $1 in
-	-r|--revert)
-		REVERT="true"
-		;;
-	-h|--help)
-		usage_exit 0
-		;;
-	*) usage_exit
-		;;
-	esac
-	shift
+    case $1 in
+    -r|--revert)
+        REVERT="true"
+        ;;
+    -h|--help)
+        usage_exit 0
+        ;;
+    *) usage_exit
+        ;;
+    esac
+    shift
 done
 
 if [ -n "$REVERT" ]; then
-	awk -b -O -v WIDTH=80 '
-	/^>/ 
-	/^[^>]/ { for (i=1;i<=length();i+=WIDTH) { print substr($0,i,WIDTH); } }' "$@"
+    awk -b -O -v WIDTH=80 '
+    /^>/ 
+    /^[^>]/ { for (i=1;i<=length();i+=WIDTH) { print substr($0,i,WIDTH); } }' "$@"
 else
-	awk -b -O 'BEGIN { ORS="" }
-	/^>/    { if (NR!=1) print "\n"; print $0 "\n" }
-	/^[^>]/ { gsub(/[[:space:]]/,""); print $0 }
-	END { print "\n" }' "$@"
+    awk -b -O 'BEGIN { ORS="" }
+    /^>/    { if (NR!=1) print "\n"; print $0 "\n" }
+    /^[^>]/ { gsub(/[[:space:]]/,""); print $0 }
+    END { print "\n" }' "$@"
 fi
 
