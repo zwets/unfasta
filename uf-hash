@@ -30,10 +30,10 @@ err_exit() {
 # Function to show usage information and exit
 usage_exit() {
 	echo "
-Usage: $(basename $0) [OPTIONS] [FILE]
+Usage: $(basename $0) [OPTIONS] [FILE ...]
 
-  Computes a hash over the sequence content of unfasta file FILE, or stdin
-  if no FILE is present.
+  Computes a hash over the sequence content of unfasta FILEs, or stdin if
+  no FILE is present or when FILE is '-'.
 
   The computed hash value is invariant to changes in the sequence headers.
   It is sensitive to changes in the order of sequences in the FILE.  Pipe

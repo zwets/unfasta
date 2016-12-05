@@ -103,3 +103,4 @@ awk -b -O -v P="$(basename "$0")" -v C=$COMPLEMENT -v R=$REVERSE -v M=$MARK '
 		}
 		printf "%c", c
 	}' "$@"
+

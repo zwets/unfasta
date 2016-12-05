@@ -47,7 +47,7 @@ Usage: $(basename $0) [OPTIONS|NUMBERS|REGEX] [FILE ...]
 
 unset NTH REGEX
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\).*')" = "-" ]; do
+while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\)..*')" = "-" ]; do
 	case $1 in
 	--nth=*)
 		NTH=${1#--nth=}

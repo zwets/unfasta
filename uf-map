@@ -27,7 +27,7 @@ err_exit() {
 # Function to show usage information and exit
 usage_exit() {
     echo "
-Usage: $(basename $0) [OPTIONS] OPERATION [FILE] ...
+Usage: $(basename $0) [OPTIONS] OPERATION [FILE ...]
 
   Feed every sequence in FILE to OPERATION's standard input.  When no FILE
   is  present or FILE is '-', read from standard input.  Write to standard
@@ -52,7 +52,7 @@ Usage: $(basename $0) [OPTIONS] OPERATION [FILE] ...
 # Parse options
 
 unset TITLES
-while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
     -t|--title*)
         TITLES=1

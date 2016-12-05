@@ -46,7 +46,7 @@ Usage: $(basename $0) [OPTIONS] NUM [FILE ...]
 BUT=0
 MARK=0
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
 	case $1 in
 	-m|--mark)
 		MARK=1

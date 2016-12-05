@@ -27,9 +27,9 @@ err_exit() {
 # Function to show usage information and exit
 usage_exit() {
 	echo "
-Usage: $(basename $0) [OPTIONS] FROM:END [FILE] ...
-       $(basename $0) [OPTIONS] FROM/LEN [FILE] ...
-       $(basename $0) [OPTIONS] MID~DIST [FILE] ...
+Usage: $(basename $0) [OPTIONS] FROM:END [FILE ...]
+       $(basename $0) [OPTIONS] FROM/LEN [FILE ...]
+       $(basename $0) [OPTIONS] MID~DIST [FILE ...]
 
   Cut a segment from each sequence in each unfasta FILE and write to standard
   output.  If no FILE is present or when FILE is '-', read standard input.
@@ -81,7 +81,7 @@ QUIET=0
 ZERO=0
 MARK=0
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\).*')" = "-" ]; do
+while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\)..*')" = "-" ]; do
 	case $1 in
 	-m|--mark)
 		MARK=1

@@ -27,7 +27,7 @@ err_exit() {
 # Function to show usage information and exit
 usage_exit() {
 	echo "
-Usage: $(basename $0) [OPTIONS] [FILE] ...
+Usage: $(basename $0) [OPTIONS] [FILE ...]
 
   Count frequencies of elements in each sequence in each unfasta FILE and write
   to standard output.  If no FILE is present or when FILE is '-', read standard

@@ -27,7 +27,7 @@ err_exit() {
 # Function to show usage information and exit
 usage_exit() {
 	echo "
-Usage: $(basename $0) [OPTIONS] [FILE] ...
+Usage: $(basename $0) [OPTIONS] [FILE ...]
 
   Output only the bare sequences from each FILE to standard output, dropping the
   headers.  If no FILE is present or FILE is '-', read from standard input.

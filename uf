@@ -27,7 +27,7 @@ err_exit() {
 # Function to show usage information and exit
 usage_exit() {
     echo "
-Usage: $(basename $0) [OPTIONS] [FILE] ...
+Usage: $(basename $0) [OPTIONS] [FILE ...]
   
   Convert FILEs to unfasta format and write to standard output.  With no
   FILE or when FILE is '-', read standard input.  Unfasta is FASTA without
@@ -52,7 +52,7 @@ Usage: $(basename $0) [OPTIONS] [FILE] ...
 
 unset REVERT
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
     -r|--revert)
         REVERT="true"
