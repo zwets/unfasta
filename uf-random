@@ -16,7 +16,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-#  Created on 2016-01-18
+#  This utility is part of http://io.zwets.it/unfasta
 
 SEQ_CHARS="ACGT"
 SEQ_COUNT=1
