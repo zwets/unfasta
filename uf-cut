@@ -20,13 +20,13 @@
 
 # Function to exit this script with an error message on stderr
 err_exit() {
-	echo "$(basename "$0"): $*" >&2
-	exit 1
+    echo "$(basename "$0"): $*" >&2
+    exit 1
 }
 
 # Function to show usage information and exit
 usage_exit() {
-	echo "
+    echo "
 Usage: $(basename $0) [OPTIONS] FROM:END [FILE ...]
        $(basename $0) [OPTIONS] FROM/LEN [FILE ...]
        $(basename $0) [OPTIONS] MID~DIST [FILE ...]
@@ -69,7 +69,7 @@ Usage: $(basename $0) [OPTIONS] FROM:END [FILE ...]
   - '$(basename "$0") x/1'        Same result as previous
   - '$(basename "$0") x~0'        Same result as previous
 " >&2
-	exit ${1:-1}
+    exit ${1:-1}
 }
 
 # Parse options
@@ -79,27 +79,27 @@ ZERO=0
 CLIP=0
 MARK=0
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\)..*')" = "-" ]; do
-	case $1 in
-	-m|--mark)
-		MARK=1
-		;;
-	-c|--clip)
-		CLIP=1
-		;;
-	-q|--quiet)
-		QUIET=1
-		;;
-	-z|--zero)
-		ZERO=1
-		;;
-	-h|--help)
-		usage_exit 0
-		;;
-	*) usage_exit
-		;;
-	esac
-	shift
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
+    case $1 in
+    -m|--mark)
+        MARK=1
+        ;;
+    -c|--clip)
+        CLIP=1
+        ;;
+    -q|--quiet)
+        QUIET=1
+        ;;
+    -z|--zero)
+        ZERO=1
+        ;;
+    -h|--help)
+        usage_exit 0
+        ;;
+    *) usage_exit
+        ;;
+    esac
+    shift
 done
 
 # Parse the cut specification - arrr walk the regex plank matey
@@ -200,3 +200,4 @@ function validate_and_map() {
 }
 ' "$@"
 
+# vim: sts=4:sw=4:et:si:ai

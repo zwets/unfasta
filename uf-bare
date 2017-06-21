@@ -20,13 +20,13 @@
 
 # Function to exit this script with an error message on stderr
 err_exit() {
-	echo "$(basename "$0"): $*" >&2
-	exit 1
+    echo "$(basename "$0"): $*" >&2
+    exit 1
 }
 
 # Function to show usage information and exit
 usage_exit() {
-	echo "
+    echo "
 Usage: $(basename $0) [OPTIONS] [FILE ...]
 
   Output only the bare sequences from each FILE to standard output, dropping the
@@ -39,7 +39,7 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
   By default headers go to /dev/null.  Use option -w to store them in a file.
   The file can be merged back in with bare sequences using 'uf-dress'.
 " >&2
-	exit ${1:-1}
+    exit ${1:-1}
 }
 
 # Parse options
@@ -47,21 +47,21 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
 unset HDRSFILE FORCE
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
-	case $1 in
-	-w)	shift
-		[ $# -ge 1 ] || usage_exit
-		HDRSFILE="$1"
-		;;
-	-f|--force)
-		FORCE="yes"
-		;;
-	--help)
-		usage_exit 0
-		;;
-	*) usage_exit
-		;;
-	esac
-	shift
+    case $1 in
+    -w)    shift
+        [ $# -ge 1 ] || usage_exit
+        HDRSFILE="$1"
+        ;;
+    -f|--force)
+        FORCE="yes"
+        ;;
+    --help)
+        usage_exit 0
+        ;;
+    *) usage_exit
+        ;;
+    esac
+    shift
 done
 
 # Check options validity
@@ -71,6 +71,7 @@ done
 # Do the work
 
 awk -b -O -v F="$HDRSFILE" '
-	NR%2==1 && F { print > F }
-	NR%2==0' "$@"
+    NR%2==1 && F { print > F }
+    NR%2==0' "$@"
 
+# vim: sts=4:sw=4:et:si:ai

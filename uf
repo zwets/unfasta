@@ -77,3 +77,4 @@ else
     END { print "\n" }' "$@"
 fi
 
+# vim: sts=4:sw=4:et:si:ai

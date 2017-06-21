@@ -23,13 +23,13 @@ ALGO="md5"
 
 # Function to exit this script with an error message on stderr
 err_exit() {
-	echo "$(basename "$0"): $*" >&2
-	exit 1
+    echo "$(basename "$0"): $*" >&2
+    exit 1
 }
 
 # Function to show usage information and exit
 usage_exit() {
-	echo "
+    echo "
 Usage: $(basename $0) [OPTIONS] [FILE ...]
 
   Computes a hash over the sequence content of unfasta FILEs, or stdin if
@@ -42,28 +42,28 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
   OPTIONS
    -a|--algo ALG     Use algorithm md5/sha1/224/256/384/512, default: $ALGO
 " >&2
-	exit ${1:-1}
+    exit ${1:-1}
 }
 
 # Parse options
 
 unset REORDERABLE
-while [ $# -ne 0 -a "$(expr "$1" : '\(.[0-9]*\)..*')" = "-" ]; do
-	case $1 in
-	--algo=*)
-		ALGO=${1#--algo=}
-		;;
-	-a|--algo*)
-		shift
-		ALGO=$1
-		;;
-	-h|--help)
-		usage_exit 0
-		;;
-	*) usage_exit
-		;;
-	esac
-	shift
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
+    case $1 in
+    --algo=*)
+        ALGO=${1#--algo=}
+        ;;
+    -a|--algo*)
+        shift
+        ALGO=$1
+        ;;
+    -h|--help)
+        usage_exit 0
+        ;;
+    *) usage_exit
+        ;;
+    esac
+    shift
 done
 
 # Check options and arguments
@@ -80,3 +80,4 @@ FILE="-"
 
 awk -b -O 'NR % 2 == 0' "$FILE" | $HASH_PGM | cut -d' ' -f1
 
+# vim: sts=4:sw=4:et:si:ai

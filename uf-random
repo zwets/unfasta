@@ -24,13 +24,13 @@ SEQ_LENGTH=100
 
 # Function to exit this script with an error message on stderr
 err_exit() {
-	echo "$(basename "$0"): $*" >&2
-	exit 1
+    echo "$(basename "$0"): $*" >&2
+    exit 1
 }
 
 # Function to show usage information and exit
 usage_exit() {
-	echo "
+    echo "
 Usage: $(basename $0) [OPTIONS] [CHARS]
 
   Write to standard output an unfasta file with randomly generated sequences.
@@ -49,48 +49,48 @@ Usage: $(basename $0) [OPTIONS] [CHARS]
   NOTE: the current implementation uses the \$RANDOM builtin to obtain random
   numbers. This is bash specific. TODO: change to read from /dev/urandom.
 " >&2
-	exit ${1:-1}
+    exit ${1:-1}
 }
 
 # Parse options
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.\).*')" = "-" ]; do
-	case $1 in
-	--count=*)
-                SEQ_COUNT=${1#--count=}
-                ;;
-        -c|--count)
-                shift
-                SEQ_COUNT=$1
-                ;;
-	--length=*)
-                SEQ_LENGTH=${1#--length=}
-                ;;
-        -l|--length)
-                shift
-                SEQ_LENGTH=$1
-                ;;
-	--range=*)
-                RANGE=${1#--range=}
-                ;;
-        -r|--range)
-                shift
-                RANGE=$1
-                ;;
-	--help)
-		usage_exit 0
-		;;
-	*) usage_exit
-		;;
-	esac
-	shift
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
+    case $1 in
+    --count=*)
+        SEQ_COUNT=${1#--count=}
+        ;;
+    -c|--count)
+        shift
+        SEQ_COUNT=$1
+        ;;
+    --length=*)
+        SEQ_LENGTH=${1#--length=}
+        ;;
+    -l|--length)
+        shift
+        SEQ_LENGTH=$1
+        ;;
+    --range=*)
+        RANGE=${1#--range=}
+        ;;
+    -r|--range)
+        shift
+        RANGE=$1
+        ;;
+    --help)
+        usage_exit 0
+        ;;
+    *) usage_exit
+        ;;
+    esac
+    shift
 done
 
 # Parse arguments
 
 if [ $# -eq 1 ]; then
-	SEQ_CHARS="$1"
-	shift
+    SEQ_CHARS="$1"
+    shift
 fi
 
 [ $# -eq 0 ] || usage_exit
@@ -98,10 +98,10 @@ fi
 # Parse MIN and MAX if random lengths are required
 
 if [ -n "$RANGE" ]; then
-	MIN_LENGTH="$(expr "$RANGE" : '\([0-9]\+\),[0-9]\+$')" || err_exit "not a valid range specification: $RANGE"
-	MAX_LENGTH="$(expr "$RANGE" : '[0-9]\+,\([0-9]\+\)$')" || err_exit "not a valid range specification: $RANGE"
-	RANGE_SIZE=$((MAX_LENGTH - MIN_LENGTH + 1))
-	[ $RANGE_SIZE -gt 0 ] || err_exit "invalid range: $RANGE"
+    MIN_LENGTH="$(expr "$RANGE" : '\([0-9]\+\),[0-9]\+$')" || err_exit "not a valid range specification: $RANGE"
+    MAX_LENGTH="$(expr "$RANGE" : '[0-9]\+,\([0-9]\+\)$')" || err_exit "not a valid range specification: $RANGE"
+    RANGE_SIZE=$((MAX_LENGTH - MIN_LENGTH + 1))
+    [ $RANGE_SIZE -gt 0 ] || err_exit "invalid range: $RANGE"
 fi
 
 # Check that we have RANDOM, which is a bash extension - @TODO migrate to /dev/urandom
@@ -111,11 +111,12 @@ expr "$RANDOM" : '[0-9]\+$' >/dev/null || err_exit "\$RANDOM not supported by sh
 # Generate the sequences 
 
 for (( S = 1 ; S <= $SEQ_COUNT ; S += 1 )); do
-	[ -z "$RANGE" ] || SEQ_LENGTH=$((MIN_LENGTH + ($RANDOM % RANGE_SIZE)))
-	echo ">lcl|$S Random sequence $S (length $SEQ_LENGTH)"
-	for (( C = 1 ; C <= SEQ_LENGTH ; C += 1 )); do
-		echo -n ${SEQ_CHARS:$(($RANDOM % ${#SEQ_CHARS})):1}
-	done
-	echo
+    [ -z "$RANGE" ] || SEQ_LENGTH=$((MIN_LENGTH + ($RANDOM % RANGE_SIZE)))
+    echo ">lcl|$S Random sequence $S (length $SEQ_LENGTH)"
+    for (( C = 1 ; C <= SEQ_LENGTH ; C += 1 )); do
+        echo -n ${SEQ_CHARS:$(($RANDOM % ${#SEQ_CHARS})):1}
+    done
+    echo
 done
 
+# vim: sts=4:sw=4:et:si:ai

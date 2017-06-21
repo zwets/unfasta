@@ -20,33 +20,34 @@
 
 # Function to exit this script with an error message on stderr
 err_exit() {
-	echo "$(basename "$0"): $*" >&2
-	exit 1
+    echo "$(basename "$0"): $*" >&2
+    exit 1
 }
 
 # Function to show usage information and exit
 usage_exit() {
-	echo "
+    echo "
 Usage: $(basename $0) [OPTIONS] [FILE ...]
 
   Drop the sequence data and output only the headers from each FILE.
   If no FILE is present or FILE is '-', read from standard input.
 " >&2
-	exit ${1:-1}
+    exit ${1:-1}
 }
 
 # Parse options
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
-	case $1 in
-	--help)
-		usage_exit 0
-		;;
-	*) usage_exit
-		;;
-	esac
-	shift
+    case $1 in
+    --help)
+        usage_exit 0
+        ;;
+    *) usage_exit
+        ;;
+    esac
+    shift
 done
 
 awk -b -O 'NR%2==1' "$@"
 
+# vim: sts=4:sw=4:et:si:ai

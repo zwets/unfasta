@@ -20,13 +20,13 @@
 
 # Function to exit this script with an error message on stderr
 err_exit() {
-	echo "$(basename "$0"): $*" >&2
-	exit 1
+    echo "$(basename "$0"): $*" >&2
+    exit 1
 }
 
 # Function to show usage information and exit
 usage_exit() {
-	echo "
+    echo "
 Usage: $(basename $0) [OPTIONS] [FILE ...]
 
   Insert headers to turn bare sequences into valid unfasta.  Reads each line from
@@ -45,7 +45,7 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
 
   See also: 'uf-map' which implements this idiom in a single command.
 " >&2
-	exit ${1:-1}
+    exit ${1:-1}
 }
 
 # Parse options
@@ -53,18 +53,18 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
 unset HDRSFILE
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
-	case $1 in
-	-r)	shift
-		[ $# -ge 1 ] || usage_exit
-		HDRSFILE="$1"
-		;;
-	--help)
-		usage_exit 0
-		;;
-	*) usage_exit
-		;;
-	esac
-	shift
+    case $1 in
+    -r)    shift
+        [ $# -ge 1 ] || usage_exit
+        HDRSFILE="$1"
+        ;;
+    --help)
+        usage_exit 0
+        ;;
+    *) usage_exit
+        ;;
+    esac
+    shift
 done
 
 # Check options validity
@@ -74,11 +74,12 @@ done
 # Do the work
 
 awk -b -O -v F="$HDRSFILE" '{
-	HDR = ""
-	if (F) getline HDR < F
-	if (!HDR) HDR = ">lcl|" NR " Dummy header " NR
-	print HDR
-	print
-	} 
-	END { if (F) close (F) }' "$@"
+    HDR = ""
+    if (F) getline HDR < F
+    if (!HDR) HDR = ">lcl|" NR " Dummy header " NR
+    print HDR
+    print
+    } 
+    END { if (F) close (F) }' "$@"
 
+# vim: sts=4:sw=4:et:si:ai

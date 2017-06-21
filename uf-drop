@@ -20,13 +20,13 @@
 
 # Function to exit this script with an error message on stderr
 err_exit() {
-	echo "$(basename "$0"): $*" >&2
-	exit 1
+    echo "$(basename "$0"): $*" >&2
+    exit 1
 }
 
 # Function to show usage information and exit
 usage_exit() {
-	echo "
+    echo "
 Usage: $(basename $0) [OPTIONS] NUM [FILE ...]
 
   For each sequence in each unfasta format FILE drop the first NUM characters
@@ -38,7 +38,7 @@ Usage: $(basename $0) [OPTIONS] NUM [FILE ...]
    -b|--but   Drop everything BUT the final NUM characters from each sequence.
    -m|--mark  Document the edit by appending '(uf:drop:[but:]NUM)' to headers.
 " >&2
-	exit ${1:-1}
+    exit ${1:-1}
 }
 
 # Parse options
@@ -47,20 +47,20 @@ BUT=0
 MARK=0
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
-	case $1 in
-	-m|--mark)
-		MARK=1
-		;;
-	-b|--but)
-		BUT=1
-		;;
-	-h|--help)
-		usage_exit 0
-		;;
-	*) usage_exit
-		;;
-	esac
-	shift
+    case $1 in
+    -m|--mark)
+        MARK=1
+        ;;
+    -b|--but)
+        BUT=1
+        ;;
+    -h|--help)
+        usage_exit 0
+        ;;
+    *) usage_exit
+        ;;
+    esac
+    shift
 done
 
 # Check first argument is positive number
@@ -73,7 +73,8 @@ shift
 # Delegate to awk
 
 awk -b -O -v P="$(basename "$0")" -v N=$NUM -v M=$MARK -v B=$BUT '
-	NR%2==1 { print $0 (M ? " (uf:drop:" (B?"but:":"") N ")" : "") }
-	NR%2==0 { print B ? substr ($0,length($0)-N+1) : substr ($0,N+1) }
-	' "$@"
+    NR%2==1 { print $0 (M ? " (uf:drop:" (B?"but:":"") N ")" : "") }
+    NR%2==0 { print B ? substr ($0,length($0)-N+1) : substr ($0,N+1) }
+    ' "$@"
 
+# vim: sts=4:sw=4:et:si:ai

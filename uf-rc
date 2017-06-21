@@ -31,27 +31,27 @@ COMP_ALPHABET="TtGgCcAaNnMmKkWwSsRrYyVvBbHhDd"
 
 # Function to exit this script with an error message on stderr
 err_exit() {
-	echo "$(basename "$0"): $*" >&2
-	exit 1
+    echo "$(basename "$0"): $*" >&2
+    exit 1
 }
 
 # Function to show usage information and exit
 usage_exit() {
-	echo "
+    echo "
 Usage: $(basename $0) [OPTIONS] [FILE ...]
 
   Write to standard output the reverse complement of every sequence in each FILE.
   If no FILE is present or FILE is '-', read from standard input.
 
-  Options
-   -r|--reverse-only     Reverse only, do not complement.
-   -c|--complement-only  Complement only, do not reverse.
-   -m|--mark[-header]    Document operation by attaching '(uf:...)' to headers.
+  OPTIONS
+   -r, --reverse-only     Reverse only, do not complement.
+   -c, --complement-only  Complement only, do not reverse.
+   -m, --mark[-header]    Document operation by attaching '(uf:...)' to headers.
 
   Case is preserved.  Will also work for the degenerate nucleotide letters.
   E.g. complement of Y (pyrimidine, T/C) is R (purine, A/T).
 " >&2
-	exit ${1:-1}
+    exit ${1:-1}
 }
 
 # Defaults
@@ -63,44 +63,45 @@ MARK=0
 # Parse options
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
-	case $1 in
-	-r|--reverse-only)
-		COMPLEMENT=0
-		;;
-	-c|--complement-only)
-		REVERSE=0
-		;;
-	-m|--mark*)
-		MARK=1
-		;;
-	--help)
-		usage_exit 0
-		;;
-	*) usage_exit
-		;;
-	esac
-	shift
+    case $1 in
+    -r|--reverse-only)
+        COMPLEMENT=0
+        ;;
+    -c|--complement-only)
+        REVERSE=0
+        ;;
+    -m|--mark*)
+        MARK=1
+        ;;
+    --help)
+        usage_exit 0
+        ;;
+    *) usage_exit
+        ;;
+    esac
+    shift
 done
 
 # Do the work
 
 awk -b -O -v P="$(basename "$0")" -v C=$COMPLEMENT -v R=$REVERSE -v M=$MARK '
-	NR%2==1 { print $0 (M ? " (uf:" (R?"reverse":"") (C?"complement":"") ")" : "") }
-	NR%2==0 {
-		if (R) for (i = length($0); i >= 1; --i) print_maybe_comp()
-		else   for (i = 1; i <= length($0); ++i) print_maybe_comp()
-		printf "\n"
-	}
-	function print_maybe_comp(     c,p) {	# Haha, globals rule, no need to pass i
-		c = substr ($0,i,1)
-		if (C) {
-			p = index ("'$NUCL_ALPHABET'", c)
-			if (!p) {
-				print P ": invalid character, cannot complement: " c
-				exit 1
-			}
-			c = substr ("'$COMP_ALPHABET'", p, 1)
-		}
-		printf "%c", c
-	}' "$@"
+    NR%2==1 { print $0 (M ? " (uf:" (R?"reverse":"") (C?"complement":"") ")" : "") }
+    NR%2==0 {
+        if (R) for (i = length($0); i >= 1; --i) print_maybe_comp()
+        else   for (i = 1; i <= length($0); ++i) print_maybe_comp()
+        printf "\n"
+    }
+    function print_maybe_comp(     c,p) {    # Haha, globals rule, no need to pass i
+        c = substr ($0,i,1)
+        if (C) {
+            p = index ("'$NUCL_ALPHABET'", c)
+            if (!p) {
+                print P ": invalid character, cannot complement: " c
+                exit 1
+            }
+            c = substr ("'$COMP_ALPHABET'", p, 1)
+        }
+        printf "%c", c
+    }' "$@"
 
+# vim: sts=4:sw=4:et:si:ai
