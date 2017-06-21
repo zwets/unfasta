@@ -77,7 +77,7 @@ done
 
 # Handle option-less case
 
-if [ -z "$NTH" ] && [ -z "$GREP" ]; then
+if [ -z "$NTH" ] && [ -z "$REGEX" ]; then
     [ -n "$1" ] || usage_exit
     if expr "$1" : '\([0-9]\+\(,[0-9]\+\)*$\)' >/dev/null; then
         NTH="$1"
