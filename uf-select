@@ -34,10 +34,11 @@ Usage: $(basename $0) [OPTIONS|NUMBERS|REGEX] [FILE ...]
 
   OPTIONS
    -n, --nth N[,..]  Select the nth sequence(s) for each file.
+   -i, --id SEQID    Select the sequence(s) whose ID contains SEQID
    -g, --grep REGEX  Select the sequence(s) whose header matches REGEX.
 
   As a convenience, when no option is specified then if the first argument 
-  parses as a valid list of NUMBERS then --nth is assumed, else --grep is
+  parses as a valid list of NUMBERS then --nth is assumed, else --id is
   assumed.
 " >&2
     exit ${1:-1}
@@ -45,7 +46,7 @@ Usage: $(basename $0) [OPTIONS|NUMBERS|REGEX] [FILE ...]
 
 # Parse options
 
-unset NTH REGEX
+unset NTH SEQID REGEX
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
@@ -55,6 +56,13 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     -n|--nth)
         shift
         NTH=$1
+        ;;
+    --id=*)
+        SEQID=${1#--id=}
+        ;;
+    -i|--id)
+        shift
+        SEQID=$1
         ;;
     --grep=*)
         REGEX=${1#--grep=}
@@ -77,19 +85,20 @@ done
 
 # Handle option-less case
 
-if [ -z "$NTH" ] && [ -z "$REGEX" ]; then
+if [ -z "${NTH}${SEQID}${REGEX}" ]; then
     [ -n "$1" ] || usage_exit
     if expr "$1" : '\([0-9]\+\(,[0-9]\+\)*$\)' >/dev/null; then
         NTH="$1"
     else
-        REGEX="$1"
+        SEQID="$1"
     fi
     shift
 fi
 
 # Check options
 
-[ -z "$NTH" ] || [ -z "$REGEX" ] || err_exit "options --nth and --grep cannot be used together"
+[ -z "$NTH" ] || [ -z "${SEQID}${REGEX}" ] || err_exit "options --nth, --id, and --grep cannot be combined"
+[ -z "$SEQID" ] || [ -z "${NTH}${REGEX}" ] || err_exit "options --nth, --id, and --grep cannot be combined"
 [ -z "$NTH" ] || expr "$NTH" : '\([0-9]\+\(,[0-9]\+\)*$\)' >/dev/null || err_exit "not a valid number list: $NTH"
 
 # Do the work
@@ -99,6 +108,10 @@ if [ -n "$NTH" ]; then
     awk -b -O -v NTH=$NTH '
     BEGIN { split(NTH,lines,/,/) } 
     { for (x in lines) if (int((NR+1)/2) == lines[x]) print }
+    ' "$@"
+elif [ -n "$SEQID" ]; then
+    awk -b -O -v SEQID="$SEQID" '
+        NR % 2 == 1 && index($1,SEQID) != 0 { print; getline; print }
     ' "$@"
 elif [ -n "$REGEX" ]; then
     awk -b -O '
