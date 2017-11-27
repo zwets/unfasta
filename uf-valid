@@ -20,33 +20,33 @@
 
 # ALPHABETS taken from http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml
 
-# Nucleic Acids
-#  A  adenosine          C  cytidine             G  guanine
-#  T  thymidine          N  A/G/C/T (any)        U  uridine 
-#  K  G/T (keto)         S  G/C (strong)         Y  T/C (pyrimidine) 
-#  M  A/C (amino)        W  A/T (weak)           R  G/A (purine)        
-#  B  G/T/C              D  G/A/T                H  A/C/T      
+# Nucleic Acids / Base
+#  A  adenosine/adenine  C  cytidine/cytosine    G  guanosine/guanine
+#  T  thymidine/thymine  N  A/G/C/T (any)        U  uracil/uridine
+#  K  G/T (keto)         S  G/C (strong)         Y  T/C (pyrimidine)
+#  M  A/C (amino)        W  A/T (weak)           R  G/A (purine)
+#  B  G/T/C              D  G/A/T                H  A/C/T
 #  V  G/C/A              -  gap of indeterminate length (EXCLUDED)
 
 DNA_ALPHABET="ACGTN"
 RNA_ALPHABET="ACGUN"
 NUCL_ALPHABET="ACGTNUKSYMWRBDHV"
 
-# Amino Acids    
-#  A  alanine               P  proline       
-#  B  aspartate/asparagine  Q  glutamine      
-#  C  cystine               R  arginine      
-#  D  aspartate             S  serine      
-#  E  glutamate             T  threonine      
-#  F  phenylalanine         U* selenocysteine (EXCLUDED)
-#  G  glycine               V  valine        
-#  H  histidine             W  tryptophan        
-#  I  isoleucine            Y  tyrosine
-#  K  lysine                Z  glutamate/glutamine
-#  L  leucine               X  any
-#  M  methionine            *  translation stop (EXCLUDED)
-#  N  asparagine            -  gap of indeterminate length (EXCLUDED)
-        
+# Amino Acids
+#  A Ala Alanine               P Pro Proline
+#  B Asx D or N                Q Gln Glutamine
+#  C Cys Cystine               R Arg Arginine
+#  D Asp Aspartate             S Ser Serine
+#  E Glu Glutamate             T Thr Threonine
+#  F Phe Phenylalanine         U     Selenocysteine (EXCLUDED)
+#  G Gly Glycine               V Val Valine
+#  H His Histidine             W Trp Tryptophan
+#  I Ile Isoleucine            Y Tyr Tyrosine
+#  K Lys Lysine                Z Glx E or Q
+#  L Leu Leucine               X any
+#  M Met Methionine            * translation stop (EXCLUDED)
+#  N Asn Asparagine            - gap of indeterminate length (EXCLUDED)
+
 AMINO_ALPHABET="ABCDEFGHIKLMNPQRSTVXWYZ"
 
 # Function to exit this script with an error message on stderr
@@ -163,7 +163,7 @@ awk -b -O -v P="$(basename "$0")" -v WRONG="[^$ALLOW]" -v H=$VAL_HEADERS -v Q=$Q
     if ( HDR !~ /^>/ ) {
         print P ": no FASTA header found at line " NR
         ERR = 1
-    } 
+    }
     else if ( H && HDR !~ /^>[[:alpha:]]+\|[[:alnum:]._]+(\|[[:alnum:]._]+)*\|?(\s+.*)?$/ ) {  # rudimentary syntax check of header
         print P ": invalid header syntax at line " NR ": " HDR > "/dev/stderr"
         ERR = 1
