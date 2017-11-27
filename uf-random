@@ -38,9 +38,9 @@ Usage: $(basename $0) [OPTIONS] [CHARS]
   Sequences can be of fixed or random lengths.
 
   Options
-   -c|--count COUNT    Number of sequences (default: $SEQ_COUNT)
-   -l|--length LEN     Length of sequences (default: $SEQ_LENGTH), excludes -r.
-   -r|--range MIN,MAX  Random length sequences in range [MIN,MAX], excludes -l.
+   -c, --count COUNT    Number of sequences (default: $SEQ_COUNT)
+   -l, --length LEN     Length of sequences (default: $SEQ_LENGTH), excludes -r.
+   -r, --range MIN,MAX  Random length sequences in range [MIN,MAX], excludes -l.
 
   The CHARS argument can be used to create sequences from any alphabet.
   To create biased sequences, repeat characters in CHARS so they have the
@@ -61,6 +61,7 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
         ;;
     -c|--count)
         shift
+        [ $# -ge 1 ] || usage_exit
         SEQ_COUNT=$1
         ;;
     --length=*)
@@ -68,6 +69,7 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
         ;;
     -l|--length)
         shift
+        [ $# -ge 1 ] || usage_exit
         SEQ_LENGTH=$1
         ;;
     --range=*)
@@ -75,6 +77,7 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
         ;;
     -r|--range)
         shift
+        [ $# -ge 1 ] || usage_exit
         RANGE=$1
         ;;
     --help)

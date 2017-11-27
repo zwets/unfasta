@@ -34,7 +34,7 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
   read standard input.  Length ties are broken alphabetically.
 
   OPTIONS
-   -r|--reverse   Reverse the order of the sort
+   -r, --reverse   Reverse the order of the sort
 " >&2
     exit ${1:-1}
 }

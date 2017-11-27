@@ -40,7 +40,7 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
   input through uf-sort to compensate for differences in sequence order.
  
   OPTIONS
-   -a|--algo ALG     Use algorithm md5/sha1/224/256/384/512, default: $ALGO
+   -a, --algo ALG   Use algorithm md5/sha1/224/256/384/512, default: $ALGO
 " >&2
     exit ${1:-1}
 }

@@ -35,8 +35,8 @@ Usage: $(basename $0) [OPTIONS] NUM [FILE ...]
   drop all except the final NUM characters.
 
   Options
-   -b|--but   Drop everything BUT the final NUM characters from each sequence.
-   -m|--mark  Document the edit by appending '(uf:drop:[but:]NUM)' to headers.
+   -b, --but   Drop everything BUT the final NUM characters from each sequence.
+   -m, --mark  Document the edit by appending '(uf:drop:[but:]NUM)' to headers.
 " >&2
     exit ${1:-1}
 }

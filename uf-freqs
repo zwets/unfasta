@@ -34,9 +34,9 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
   input.
 
   Options
-   -b|--bare          Do not output the headers, only the data
-   -l|--length-only   Length of sequence only, no frequencies per element
-   -t|--totals        Totals across all sequences at bottom
+   -b, --bare         Do not output the headers, only the data
+   -l, --length-only  Length of sequence only, no frequencies per element
+   -t, --totals       Totals across all sequences at bottom
 " >&2
     exit ${1:-1}
 }

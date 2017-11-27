@@ -38,9 +38,9 @@ Usage: $(basename $0) [OPTIONS] FROM:END [FILE ...]
   output unless option -z|--zero is present.
 
   Options
-   -q|--quiet   Do not emit messages about failed cuts.
-   -z|--zero    Output a zero length sequence for a failed cut.
-   -m|--mark    Document the cut by appending '(uf:circut:...)' to header.
+   -q, --quiet  Do not emit messages about failed cuts.
+   -z, --zero   Output a zero length sequence for a failed cut.
+   -m, --mark   Document the cut by appending '(uf:circut:...)' to header.
 
   There are three ways to specify the section:
   1. FROM:END cuts the section starting at position FROM and ending at poition

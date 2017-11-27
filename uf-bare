@@ -34,7 +34,7 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
 
   Options
    -w HDRSFILE   Write the headers to HDRSFILE, which must not already exist.
-   -f|--force    Overwrite HDRSFILE if it exists.
+   -f, --force   Overwrite HDRSFILE if it exists.
 
   By default headers go to /dev/null.  Use option -w to store them in a file.
   The file can be merged back in with bare sequences using 'uf-dress'.

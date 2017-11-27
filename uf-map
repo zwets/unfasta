@@ -36,8 +36,8 @@ Usage: $(basename $0) [OPTIONS] OPERATION [FILE ...]
   sequence titles instead, passing the sequence data straight through.
 
   OPTIONS
-    -t, --titles  map OPERATION over the sequence headers instead of of data
-    -h, --help    this help
+   -t, --titles  map OPERATION over the sequence headers instead of of data
+   -h, --help    this help
 
   Note that OPERATION is started once, not invoked separately for each line.
   It must process every line coming in on its standard input separately.

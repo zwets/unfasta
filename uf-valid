@@ -105,6 +105,7 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
         ;;
     -a|--allow)
         shift
+        [ $# -ge 1 ] || usage_exit
         ALLOW="${ALLOW}$1"
         ;;
     --dna)

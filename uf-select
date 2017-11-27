@@ -55,6 +55,7 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
         ;;
     -n|--nth)
         shift
+        [ $# -ge 1 ] || usage_exit
         NTH=$1
         ;;
     --id=*)
@@ -62,6 +63,7 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
         ;;
     -i|--id)
         shift
+        [ $# -ge 1 ] || usage_exit
         SEQID=$1
         ;;
     --grep=*)
@@ -69,6 +71,7 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
         ;;
     -g|--grep)
         shift
+        [ $# -ge 1 ] || usage_exit
         REGEX=$1
         ;;
     -h|--help)
