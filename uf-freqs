@@ -79,6 +79,7 @@ NR%2==0 {
         for (j in freqs) totals[j] += freqs[j]
         grand_total += length($0)
     }
+    for (j in freqs) freqs[j] = 0
 }
 END { 
     if (TOTALS) {
