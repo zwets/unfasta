@@ -20,7 +20,7 @@
 
 # Nucleic Acids
 #  A  adenosine          C  cytidine             G  guanine
-#  T  thymidine          N  A/G/C/T (any)        U  uridine (EXCLUDED(
+#  T  thymidine          N  A/G/C/T (any)        U  uridine (EXCLUDED)
 #  K  G/T (keto)         S  G/C (strong)         Y  T/C (pyrimidine) 
 #  M  A/C (amino)        W  A/T (weak)           R  G/A (purine)        
 #  B  G/T/C              D  G/A/T                H  A/C/T      
