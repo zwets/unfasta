@@ -34,14 +34,17 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
   the pesky line breaks.
  
   Options
-   -r, --revert  Revert unfasta to FASTA. 
-        Break sequences at 80 chars.  However note that there is no need
-        to revert unfasta 'back' to FASTA.  Every unfasta file is a valid
-        FASTA file as the 80 char limit is a recommendation only.
+   -r, --revert  Revert unfasta to FASTA (see below)
+   -l, --lower   Write lowercase
+   -u, --upper   Write uppercase
 
-  This program strips whitespace including line breaks from the sequence
-  lines, but leaves everything else intact.  It performs no validation on
-  the header or data lines.  See uf-valid.
+  Option -r reverts sequences to classic FASTA by breaking lines at 80 chars.
+  Note however that there is no need to do this, as every unfasta file is also
+  a valid FASTA file.  The 60 or 80 char limit is only a recommendation.
+
+  Note that all this program does is removing all white space from the sequence
+  lines in the input.  It leaves everything else intact.  Notably it performs no
+  validation on the header or data lines.  See uf-valid.
 
   More information about the unfasta suite at http://io.zwets.it/unfasta.
 " >&2
@@ -51,10 +54,18 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
 # Parse options
 
 unset REVERT
+LOWER=0
+UPPER=0
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    -r|--revert)
+    -l|--lower)
+        LOWER=1
+        ;;
+    -u|--upper)
+        UPPER=1
+        ;;
+    -r|--rever*)
         REVERT="true"
         ;;
     -h|--help)
@@ -67,13 +78,13 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
 done
 
 if [ -n "$REVERT" ]; then
-    awk -b -O -v WIDTH=80 '
+    awk -b -O -v WIDTH=80 -v L=$LOWER -v U=$UPPER '
     /^>/ 
-    /^[^>]/ { for (i=1;i<=length();i+=WIDTH) { print substr($0,i,WIDTH); } }' "$@"
+    /^[^>]/ { for (i=1;i<=length();i+=WIDTH) { S=substr($0,i,WIDTH); print (L ? tolower(S) : U ? toupper(S) : S) } }' "$@"
 else
-    awk -b -O 'BEGIN { ORS="" }
+    awk -b -O -v L=$LOWER -v U=$UPPER 'BEGIN { ORS="" }
     /^>/    { if (NR!=1) print "\n"; print $0 "\n" }
-    /^[^>]/ { gsub(/[[:space:]]/,""); print $0 }
+    /^[^>]/ { gsub(/[[:space:]]/,""); print (L ? tolower($0) : U ? toupper($0) : $0) }
     END { print "\n" }' "$@"
 fi
 
