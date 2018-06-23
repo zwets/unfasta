@@ -70,7 +70,8 @@ done
 
 # Do the work
 
-awk -b -O -v F="$HDRSFILE" '
+awk -b -O -v F="$HDRSFILE" -v P="$(basename "$0")" '
+    NR%2==1 && substr($0,1,1) != ">" { print P ": warning: discarding line that does not look like a FASTA header: " $0 > "/dev/stderr" }
     NR%2==1 && F { print > F }
     NR%2==0' "$@"
 
