@@ -114,7 +114,7 @@ if [ -n "$NTH" ]; then
     ' "$@"
 elif [ -n "$SEQID" ]; then
     awk -b -O -v SEQID="$SEQID" '
-        NR % 2 == 1 && index($1,SEQID) != 0 { print; getline; print }
+        NR % 2 == 1 && (P=index($1,SEQID)) != 0 { C=substr($1,P+length(SEQID),1); if (C=="" || C==" " || C=="|") { print; getline; print } }
     ' "$@"
 elif [ -n "$REGEX" ]; then
     awk -b -O '
