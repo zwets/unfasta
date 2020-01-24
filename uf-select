@@ -106,22 +106,25 @@ fi
 
 # Do the work
 
-if [ -n "$NTH" ]; then
-    #awk -b -O -v NTH=$NTH 'BEGIN { split(NTH,lines,/,/) } int((NR+1)/2) in lines' "$@"
-    awk -b -O -v NTH=$NTH '
-    BEGIN { split(NTH,lines,/,/) } 
-    { for (x in lines) if (int((NR+1)/2) == lines[x]) print }
-    ' "$@"
-elif [ -n "$SEQID" ]; then
-    awk -b -O -v SEQID="$SEQID" '
-        NR % 2 == 1 && (P=index($1,SEQID)) != 0 { C=substr($1,P+length(SEQID),1); if (C=="" || C==" " || C=="|") { print; getline; print } }
-    ' "$@"
-elif [ -n "$REGEX" ]; then
-    awk -b -O '
-        NR % 2 == 1 && /'$REGEX'/ { print; getline; print }
-    ' "$@"
-else
-    usage_exit
-fi
+while [ $# -ne 0 ]; do
+    if [ -n "$NTH" ]; then
+        #awk -b -O -v NTH=$NTH 'BEGIN { split(NTH,lines,/,/) } int((NR+1)/2) in lines' "$@"
+        awk -b -O -v NTH=$NTH '
+        BEGIN { split(NTH,lines,/,/) } 
+        { for (x in lines) if (int((NR+1)/2) == lines[x]) print }
+        ' "$1"
+    elif [ -n "$SEQID" ]; then
+        awk -b -O -v SEQID="$SEQID" '
+            NR % 2 == 1 && (P=index($1,SEQID)) != 0 { C=substr($1,P+length(SEQID),1); if (C=="" || C==" " || C=="|") { print; getline; print } }
+        ' "$1"
+    elif [ -n "$REGEX" ]; then
+        awk -b -O '
+            NR % 2 == 1 && /'$REGEX'/ { print; getline; print }
+        ' "$1"
+    else
+        usage_exit
+    fi
+    shift
+done
 
 # vim: sts=4:sw=4:et:si:ai
