@@ -29,8 +29,8 @@ usage_exit() {
     echo "
 Usage: $(basename $0) [OPTIONS|NUMBERS|REGEX] [FILE ...]
 
-  Select sequences from unfasta FILEs and write to standard output.  If no FILE
-  is present or when FILE is '-', read standard input.
+  Select sequences from unfasta FILEs and write to standard output.
+  If no FILE is present or when FILE is '-', read standard input.
 
   OPTIONS
    -n, --nth N[,..]  Select the nth sequence(s) for each file.
@@ -106,25 +106,24 @@ fi
 
 # Do the work
 
-while [ $# -ne 0 ]; do
+FILE="${1:--}"
+
+while [ -n "$FILE" ]; do
     if [ -n "$NTH" ]; then
-        #awk -b -O -v NTH=$NTH 'BEGIN { split(NTH,lines,/,/) } int((NR+1)/2) in lines' "$@"
-        awk -b -O -v NTH=$NTH '
+        awk -b -v NTH=$NTH '
         BEGIN { split(NTH,lines,/,/) } 
         { for (x in lines) if (int((NR+1)/2) == lines[x]) print }
-        ' "$1"
+        ' "$FILE"
     elif [ -n "$SEQID" ]; then
-        awk -b -O -v SEQID="$SEQID" '
+        awk -b -v SEQID="$SEQID" '
             NR % 2 == 1 && (P=index($1,SEQID)) != 0 { C=substr($1,P+length(SEQID),1); if (C=="" || C==" " || C=="|") { print; getline; print } }
-        ' "$1"
+        ' "$FILE"
     elif [ -n "$REGEX" ]; then
-        awk -b -O '
-            NR % 2 == 1 && /'$REGEX'/ { print; getline; print }
-        ' "$1"
+        awk -b "$(printf 'NR %% 2 == 1 && /%s/ { print; getline; print }\n' "$REGEX")" "$FILE"
     else
         usage_exit
     fi
-    shift
+    [ $# -gt 0 ] && shift && FILE="$1" || unset FILE
 done
 
 # vim: sts=4:sw=4:et:si:ai
