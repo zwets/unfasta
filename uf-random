@@ -44,10 +44,7 @@ Usage: $(basename $0) [OPTIONS] [CHARS]
 
   The CHARS argument can be used to create sequences from any alphabet.
   To create biased sequences, repeat characters in CHARS so they have the
-  desired proportions.  E.g. \'AACCCTTGGG\' yields sequences with 60% GC.
-
-  NOTE: the current implementation uses the \$RANDOM builtin to obtain random
-  numbers. This is bash specific. TODO: change to read from /dev/urandom.
+  desired proportions.  E.g. 'AACCCTTGGG' yields sequences with 60% GC.
 " >&2
     exit ${1:-1}
 }
