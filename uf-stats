@@ -1,0 +1,109 @@
+#!/bin/sh
+#
+#  uf-stats - Statistics over unfasta files
+#  Copyright (C) 2020  Marco van Zwetselaar <io@zwets.it>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  This utility is part of http://io.zwets.it/unfasta
+
+# Function to exit this script with an error message on stderr
+err_exit() {
+    echo "$(basename "$0"): $*" >&2
+    exit 1
+}
+
+MIN_LEN=500
+DELIM="$(printf '\t')"
+
+# Function to show usage information and exit
+usage_exit() {
+    echo "
+Usage: $(basename $0) [OPTIONS] [FILE ...]
+
+  Compute statistics over all sequences of at length LEN (default $MIN_LEN)
+  across all FILEs.  If no FILE is present or FILE is '-', read stdin.
+
+  Writes to stdout the number of sequences, total length, longest length,
+  N50, N75, L50, L75, Ns per 100k, GC%, threshold LEN, number of sequences
+  below LEN, length in seqs below LEN, pct bases in seqs below len.
+
+  Options
+   -m, --min-len=LEN  Consider only sequences of at least length LEN [$MIN_LEN]
+   -d, --delim=SEP    Use SEP to delimit columns (default TAB)
+   -t, --transpose    Output statistics down rows (default across columns)
+   -b, --bare         Do not output the header row or column
+" >&2
+    exit ${1:-1}
+}
+
+# Parse options
+
+TRANS=0
+BARE=0
+
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
+    case $1 in
+    --min-len*=*)   MIN_LEN="${1##--min-len*=}" ;;
+    -m|--min-len)   shift || usage_exit; MIN_LEN="$1" ;;
+    --delim=*)      DELIM="${1##--delim=}" ;;
+    -d|--delim)     shift || usage_exit; DELIM="$1" ;;
+    -t|--trans*)    TRANS=1 ;;
+    -b|--bare)      BARE=1 ;;
+    -h|--help)      usage_exit 0 ;;
+    *) usage_exit   ;;
+    esac
+    shift
+done
+
+gawk -bO -v P="$(basename "$0")" -v MIN_LEN="$MIN_LEN" -v DELIM="$DELIM" -v TRANS="$TRANS" -v BARE="$BARE" '
+NR%2==0 {
+    if (length() >= MIN_LEN) {
+        for (i=1; i<=length(); ++i) F[toupper(substr($0,i,1))] += 1
+        N+=1; T+=length()
+        L[N] = length()
+    }
+    else {
+        N_IGN+=1
+        T_IGN+=length()
+    }
+}
+END {
+    GC2AT = (F["G"]+F["C"]) / (F["A"]+F["T"])
+    PCT_GC=int(0.5+1000*(GC2AT/(1+GC2AT)))/10
+
+    asort(L,L,"@val_num_desc")
+    for (i=1; i<=N; ++i) {
+        C+=L[i]
+        if (!L50 && C>T/2) L50 = i
+        if (!L75 && C>3*T/4) L75 = i
+    }
+
+    H[1]="n_seqs"; H[2]="tot_len"; H[3]="max_len"; H[4]="n50"; H[5]="n75"; H[6]="l50"; H[7]="l75"
+    H[8]="n_100k"; H[9]="pct_gc"; H[10]="min_len"; H[11]="n_ign"; H[12]="len_ign"; H[13]="pct_ign"
+
+    V["n_seqs"]=N; V["tot_len"]=T; V["max_len"]=L[1]; V["n50"]=L[L50]; V["n75"]=L[L75]; V["l50"]=L50;
+    V["l75"]=L75; V["n_100k"]=int(0.5+100000*F["N"]/T); V["pct_gc"]=PCT_GC; V["min_len"]=MIN_LEN;
+    V["n_ign"]=N_IGN; V["len_ign"]=T_IGN; V["pct_ign"]=int(0.5+100*T_IGN/(T+T_IGN))
+
+    OFS=DELIM
+    if (!TRANS) {
+        if (!BARE) for (i=1; i<=length(H); ++i) printf H[i] (i<length(H)?OFS:ORS)
+        for (i=1; i<=length(H); ++i) printf V[H[i]] (i<length(H)?OFS:ORS)
+    }
+    else for (i=1; i<=length(H); ++i) print (BARE?"":H[i] OFS) V[H[i]]
+} 
+' "$@"
+
+# vim: sts=4:sw=4:et:si:ai
