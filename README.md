@@ -70,7 +70,7 @@ Find [Unfasta on GitHub](https://github.com/zwets/unfasta).
 |Tool|Description|
 |----|-----------|
 |`uf`| Convert FASTA to unfasta |
-|`uf-bare`| Strip the headers, output only the bare sequences |
+|`uf-bare`| Strip the headers, output only the bare sequences (contigs) |
 |`uf-circut`| Cut sections out of circular sequences, allowing wraparound |
 |`uf-cut`| Cut sections from linear sequences |
 |`uf-dress`| Undo the effect of `uf-bare`: add headers to a stream of bare sequence data |
@@ -197,8 +197,8 @@ There are two reasons to support zero-length sequences.  Firstly, a zero-length 
 
 ### Glossary
 
-bare sequence, raw sequence
-: sequence data for a single sequence without the associated header
+bare sequence, contig
+: sequence data for a single sequence, without the associated header
 
 defline
 : Abbreviation for "definition line", NCBI synonym for the header line.
@@ -216,7 +216,7 @@ pipe
 : A channel connecting a source with a sink.
 
 sequence
-: Tuple of a bare sequence and its header.  Serialised in unfasta as a sequence record.  Also used as short for sequence record.  Also used as short for bare sequence.
+: Tuple of a bare sequence (contig) and its header.  Serialised in unfasta as a sequence record.  Also used as short for sequence record.  Also used as short for bare sequence.
 
 sequence record
 : The serialised form of a sequence in an unfasta file, being a header line followed by a sequence line.

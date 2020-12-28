@@ -29,15 +29,15 @@ usage_exit() {
     echo "
 Usage: $(basename $0) [OPTIONS] [FILE ...]
 
-  Output only the bare sequences from each FILE to standard output, dropping the
-  headers.  If no FILE is present or FILE is '-', read from standard input.
+  Output only the bare sequences (contigs) from each FILE to standard output,
+  omitting the headers.  If no FILE is present or FILE is '-', read from stdin.
 
   Options
    -w HDRSFILE   Write the headers to HDRSFILE, which must not already exist.
    -f, --force   Overwrite HDRSFILE if it exists.
 
   By default headers go to /dev/null.  Use option -w to store them in a file.
-  The file can be merged back in with bare sequences using 'uf-dress'.
+  The file can be merged back in with 'uf-dress'.
 " >&2
     exit ${1:-1}
 }

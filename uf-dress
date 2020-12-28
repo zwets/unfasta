@@ -29,9 +29,9 @@ usage_exit() {
     echo "
 Usage: $(basename $0) [OPTIONS] [FILE ...]
 
-  Insert headers to turn bare sequences into valid unfasta.  Reads each line from
-  each FILE and writes it to standard output preceded by a header line.  If no 
-  FILE is present or FILE is '-' read from standard input.
+  Insert headers to turn bare sequences (contigs) into valid unfasta.  Reads
+  each line from each FILE and writes it to standard output preceded by a
+  header line.  If no FILE is present or FILE is '-' read from standard input.
 
   Options
    -r HDRSFILE  Optional file to read header lines from.  If not specified or if
