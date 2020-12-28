@@ -74,10 +74,10 @@ shift
 
 # Making this work produced two nice false starts: a race and a deadlock
 
-# FAIL 1: using pipe inside awk (use the awk pipe feature)
+# FAIL 1: using pipe inside gawk
 # Fails because of race: external OPERATION is buffering its output,
 # so lines do not come out in the right order, not even with flush.
-# awk -b -O -v OPER="sh -c '$OPERATION'" '
+# gawk -bO -v OPER="sh -c '$OPERATION'" '
 #    NR%2==1 { print }
 #    NR%2==0 { print | OPER }
 #    { fflush() }' "$@"
@@ -100,7 +100,7 @@ mkfifo "$FIFO"
 # The pipeline splits the lines between FIFO and OPERATION, then paste merges hem
 if [ -z "$TITLES" ]; then LHS="$FIFO"; RHS="-"; else LHS="-"; RHS="$FIFO"; fi
 
-awk -b -O -v FIFO="$FIFO" -v ONE="${TITLES:-0}" '
+gawk -bO -v FIFO="$FIFO" -v ONE="${TITLES:-0}" '
         (NR+ONE)%2==1 { print > FIFO }; 
         (NR+ONE)%2==0' "$@" \
     | $OPERATION \

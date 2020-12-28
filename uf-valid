@@ -158,7 +158,7 @@ done
 
 # Do the work
 
-awk -b -O -v P="$(basename "$0")" -v WRONG="[^$ALLOW]" -v H=$VAL_HEADERS -v Q=$QUIET -v K=$KEEP_ERRORS -v S=$STOP_ON_ERR -v IGNORECASE=$IGNORE_CASE '{
+gawk -bO -v P="$(basename "$0")" -v WRONG="[^$ALLOW]" -v H=$VAL_HEADERS -v Q=$QUIET -v K=$KEEP_ERRORS -v S=$STOP_ON_ERR -v IGNORECASE=$IGNORE_CASE '{
     ERR = 0
     HDR = $0
     if ( HDR !~ /^>/ ) {

@@ -67,7 +67,7 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     shift
 done
 
-awk -b -O -v P="$(basename "$0")" -v BARE=$BARE -v LENGTH_ONLY=$LENGTH_ONLY -v TOTALS=$TOTALS '
+gawk -bO -v P="$(basename "$0")" -v BARE=$BARE -v LENGTH_ONLY=$LENGTH_ONLY -v TOTALS=$TOTALS '
 BEGIN { PROCINFO["sorted_in"] = "@ind_str_asc" }
 NR%2==1 && !BARE 
 NR%2==0 {

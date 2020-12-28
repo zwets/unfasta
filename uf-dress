@@ -73,7 +73,7 @@ done
 
 # Do the work
 
-awk -b -O -v F="$HDRSFILE" '{
+gawk -bO -v F="$HDRSFILE" '{
     HDR = ""
     if (F) getline HDR < F
     if (!HDR) HDR = ">lcl|" NR " Dummy header " NR

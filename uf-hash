@@ -78,6 +78,6 @@ FILE="-"
 
 # Do the work
 
-awk -b -O 'NR % 2 == 0' "$FILE" | $HASH_PGM | cut -d' ' -f1
+gawk -bO 'NR % 2 == 0' "$FILE" | $HASH_PGM | cut -d' ' -f1
 
 # vim: sts=4:sw=4:et:si:ai

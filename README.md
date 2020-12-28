@@ -86,7 +86,7 @@ Find [Unfasta on GitHub](https://github.com/zwets/unfasta).
 |`uf-take`| Take the initial N elements from a sequence, or take elements until N are left |
 |`uf-valid`| Validate an unfasta stream against its allowed alphabet and NCBI conventions |
 
-Each has a `-h|--help` option for usage instructions.  All depend only on `awk` and a POSIX shell, except `uf-random` which requires `bash` for its `RANDOM` extension.
+Each has a `-h|--help` option for usage instructions.  All depend only on GNU awk (`gawk`) and a POSIX shell, except `uf-random` which requires `bash` for its `RANDOM` extension.
 
 
 ## Design principles

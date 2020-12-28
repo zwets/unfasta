@@ -110,16 +110,16 @@ FILE="${1:--}"
 
 while [ -n "$FILE" ]; do
     if [ -n "$NTH" ]; then
-        awk -b -v NTH=$NTH '
+        gawk -bO -v NTH=$NTH '
         BEGIN { split(NTH,lines,/,/) } 
         { for (x in lines) if (int((NR+1)/2) == lines[x]) print }
         ' "$FILE"
     elif [ -n "$SEQID" ]; then
-        awk -b -v SEQID="$SEQID" '
+        gawk -bO -v SEQID="$SEQID" '
             NR % 2 == 1 && (P=index($1,SEQID)) != 0 { C=substr($1,P+length(SEQID),1); if (C=="" || C==" " || C=="|") { print; getline; print } }
         ' "$FILE"
     elif [ -n "$REGEX" ]; then
-        awk -b "$(printf 'NR %% 2 == 1 && /%s/ { print; getline; print }\n' "$REGEX")" "$FILE"
+        gawk -bO "$(printf 'NR %% 2 == 1 && /%s/ { print; getline; print }\n' "$REGEX")" "$FILE"
     else
         usage_exit
     fi

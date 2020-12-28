@@ -114,9 +114,9 @@ LHS="$(expr "$CUT_SPEC" : '\(.*\)[/:~].*')"
 OP="$(expr  "$CUT_SPEC" : '.*\([/:~]\).*')"
 RHS="$(expr "$CUT_SPEC" : '.*[/:~]\(.*\)')"
 
-# Delegate to awk
+# Delegate to gawk
 
-awk -b -O -v P="$(basename "$0")" -v FROM=$LHS -v MID=$LHS -v UPTO=$RHS -v LEN=$RHS -v DIST=$RHS -v OP="$OP" -v Z=$ZERO -v Q=$QUIET -v M=$MARK '
+gawk -bO -v P="$(basename "$0")" -v FROM=$LHS -v MID=$LHS -v UPTO=$RHS -v LEN=$RHS -v DIST=$RHS -v OP="$OP" -v Z=$ZERO -v Q=$QUIET -v M=$MARK '
 function bump0(p1,p2) { return p1 < 0 && p2 >= 0 ? 1 : 0 }    # return 1 if from p1 to p2 crosses 0
 
 BEGIN { 

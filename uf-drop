@@ -70,9 +70,9 @@ done
 NUM=$1
 shift
 
-# Delegate to awk
+# Delegate to gawk
 
-awk -b -O -v P="$(basename "$0")" -v N=$NUM -v M=$MARK -v B=$BUT '
+gawk -bO -v P="$(basename "$0")" -v N=$NUM -v M=$MARK -v B=$BUT '
     NR%2==1 { print $0 (M ? " (uf:drop:" (B?"but:":"") N ")" : "") }
     NR%2==0 { print B ? substr ($0,length($0)-N+1) : substr ($0,N+1) }
     ' "$@"

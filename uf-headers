@@ -48,6 +48,6 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     shift
 done
 
-awk -b -O 'NR%2==1' "$@"
+gawk -bO 'NR%2==1' "$@"
 
 # vim: sts=4:sw=4:et:si:ai

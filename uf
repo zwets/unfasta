@@ -78,11 +78,11 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
 done
 
 if [ -n "$REVERT" ]; then
-    awk -b -O -v WIDTH=80 -v L=$LOWER -v U=$UPPER '
+    gawk -bO -v WIDTH=80 -v L=$LOWER -v U=$UPPER '
     /^>/ 
     /^[^>]/ { for (i=1;i<=length();i+=WIDTH) { S=substr($0,i,WIDTH); print (L ? tolower(S) : U ? toupper(S) : S) } }' "$@"
 else
-    awk -b -O -v L=$LOWER -v U=$UPPER 'BEGIN { ORS="" }
+    gawk -bO -v L=$LOWER -v U=$UPPER 'BEGIN { ORS="" }
     /^>/    { if (NR!=1) print "\n"; print $0 "\n" }
     /^[^>]/ { gsub(/[[:space:]]/,""); print (L ? tolower($0) : U ? toupper($0) : $0) }
     END { print "\n" }' "$@"
