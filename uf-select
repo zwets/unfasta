@@ -34,7 +34,7 @@ Usage: $(basename $0) [OPTIONS|NUMBERS|REGEX] [FILE ...]
 
   OPTIONS
    -n, --nth N[,..]  Select the nth sequence(s) for each file.
-   -i, --id SEQID    Select the sequence(s) whose ID contains SEQID
+   -i, --id SEQID    Select the sequence(s) whose ID equals SEQID
    -g, --grep REGEX  Select the sequence(s) whose header matches REGEX.
 
   As a convenience, when no option is specified then if the first argument 
@@ -116,7 +116,7 @@ while [ -n "$FILE" ]; do
         ' "$FILE"
     elif [ -n "$SEQID" ]; then
         gawk -bO -v SEQID="$SEQID" '
-            NR % 2 == 1 && (P=index($1,SEQID)) != 0 { C=substr($1,P+length(SEQID),1); if (C=="" || C==" " || C=="|") { print; getline; print } }
+            NR % 2 == 1 && $1 == ">" SEQID { print; getline; print }
         ' "$FILE"
     elif [ -n "$REGEX" ]; then
         gawk -bO "$(printf 'NR %% 2 == 1 && /%s/ { print; getline; print }\n' "$REGEX")" "$FILE"
