@@ -56,15 +56,15 @@ BARE=0
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
     --min-len*=*)   MIN_LEN="${1##--min-len*=}" ;;
-    -m|--min-len)   shift || usage_exit; MIN_LEN="$1" ;;
+    -m|--min-len)   shift; MIN_LEN="$1" ;;
     --delim=*)      DELIM="${1##--delim=}" ;;
-    -d|--delim)     shift || usage_exit; DELIM="$1" ;;
+    -d|--delim)     shift; DELIM="$1" ;;
     -t|--trans*)    TRANS=1 ;;
     -b|--bare)      BARE=1 ;;
     -h|--help)      usage_exit 0 ;;
     *) usage_exit   ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 gawk -bO -v P="$(basename "$0")" -v MIN_LEN="$MIN_LEN" -v DELIM="$DELIM" -v TRANS="$TRANS" -v BARE="$BARE" '

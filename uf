@@ -65,7 +65,7 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     -h|--help)   usage_exit 0 ;;
     *) usage_exit ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 if [ -n "$REVERT" ]; then

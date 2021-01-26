@@ -39,13 +39,10 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    --help)
-        usage_exit 0
-        ;;
-    *) usage_exit
-        ;;
+    --help) usage_exit 0 ;;
+    *) usage_exit ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 gawk -bO 'NR%2==1' "$@"

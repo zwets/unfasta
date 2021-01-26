@@ -50,20 +50,12 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
 unset REORDERABLE
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    --algo=*)
-        ALGO=${1#--algo=}
-        ;;
-    -a|--algo*)
-        shift
-        ALGO=$1
-        ;;
-    -h|--help)
-        usage_exit 0
-        ;;
-    *) usage_exit
-        ;;
+    --algo=*)    ALGO=${1#--algo=} ;;
+    -a|--algo*)  shift; ALGO=$1 ;;
+    -h|--help)   usage_exit 0 ;;
+    *) usage_exit ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 # Check options and arguments

@@ -45,16 +45,11 @@ unset REVERSE
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    -r|--reverse)
-        REVERSE="-r"
-        ;;
-    -h|--help)
-        usage_exit 0
-        ;;
-    *) usage_exit
-        ;;
+    -r|--reverse) REVERSE="-r" ;;
+    -h|--help)    usage_exit 0 ;;
+    *)            usage_exit ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 # Do the work

@@ -100,14 +100,6 @@ QUIET=0
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    --allow=*)
-        ALLOW="${ALLOW}${1#"--allow="}"
-        ;;
-    -a|--allow)
-        shift
-        [ $# -ge 1 ] || usage_exit
-        ALLOW="${ALLOW}$1"
-        ;;
     --dna)
         [ -z "$ALLOW" ] || err_exit "option $1 may be followed by --allow but not otherwise combined"
         ALLOW="$DNA_ALPHABET"
@@ -128,28 +120,17 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
         ALLOW="$AMINO_ALPHABET"
         IGNORE_CASE=1
         ;;
-    -i|--ignore*)
-        IGNORE_CASE=1
-        ;;
-    -v|--headers)
-        VAL_HEADERS=1
-        ;;
-    -s|--stop)
-        STOP_ON_ERR=1
-        ;;
-    -k|--keep-errors)
-        KEEP_ERRORS=1
-        ;;
-    -q|--quiet)
-        QUIET=1
-        ;;
-    --help)
-        usage_exit 0
-        ;;
-    *) usage_exit
-        ;;
+    --allow=*)        ALLOW="${ALLOW}${1#"--allow="}" ;;
+    -a|--allow)       shift; ALLOW="${ALLOW}$1" ;;
+    -i|--ignore*)     IGNORE_CASE=1 ;;
+    -v|--headers)     VAL_HEADERS=1 ;;
+    -s|--stop)        STOP_ON_ERR=1 ;;
+    -k|--keep*)       KEEP_ERRORS=1 ;;
+    -q|--quiet)       QUIET=1 ;;
+    --help) usage_exit 0 ;;
+    *) usage_exit ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 # Check that at least some alphabet was selected

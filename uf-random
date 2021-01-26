@@ -53,37 +53,16 @@ Usage: $(basename $0) [OPTIONS] [CHARS]
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    --count=*)
-        SEQ_COUNT=${1#--count=}
-        ;;
-    -c|--count)
-        shift
-        [ $# -ge 1 ] || usage_exit
-        SEQ_COUNT=$1
-        ;;
-    --length=*)
-        SEQ_LENGTH=${1#--length=}
-        ;;
-    -l|--length)
-        shift
-        [ $# -ge 1 ] || usage_exit
-        SEQ_LENGTH=$1
-        ;;
-    --range=*)
-        RANGE=${1#--range=}
-        ;;
-    -r|--range)
-        shift
-        [ $# -ge 1 ] || usage_exit
-        RANGE=$1
-        ;;
-    --help)
-        usage_exit 0
-        ;;
-    *) usage_exit
-        ;;
+    --count=*)   SEQ_COUNT=${1#--count=} ;;
+    -c|--count)  shift; SEQ_COUNT=$1 ;;
+    --length=*)  SEQ_LENGTH=${1#--length=} ;;
+    -l|--length) shift; SEQ_LENGTH=$1 ;;
+    --range=*)   RANGE=${1#--range=} ;;
+    -r|--range)  shift; RANGE=$1 ;;
+    --help)      usage_exit 0 ;;
+    *) usage_exit ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 # Parse arguments

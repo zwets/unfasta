@@ -81,25 +81,14 @@ MARK=0
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    -m|--mark)
-        MARK=1
-        ;;
-    -c|--clip)
-        CLIP=1
-        ;;
-    -q|--quiet)
-        QUIET=1
-        ;;
-    -z|--zero)
-        ZERO=1
-        ;;
-    -h|--help)
-        usage_exit 0
-        ;;
-    *) usage_exit
-        ;;
+    -m|--mark)  MARK=1 ;;
+    -c|--clip)  CLIP=1 ;;
+    -q|--quiet) QUIET=1 ;;
+    -z|--zero)  ZERO=1 ;;
+    -h|--help)  usage_exit 0 ;;
+    *) usage_exit ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 # Parse the cut specification - arrr walk the regex plank matey

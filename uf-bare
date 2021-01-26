@@ -48,20 +48,12 @@ unset HDRSFILE FORCE
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    -w)    shift
-        [ $# -ge 1 ] || usage_exit
-        HDRSFILE="$1"
-        ;;
-    -f|--force)
-        FORCE="yes"
-        ;;
-    --help)
-        usage_exit 0
-        ;;
-    *) usage_exit
-        ;;
+    -w)         shift; HDRSFILE="$1" ;;
+    -f|--force) FORCE="yes" ;;
+    --help)     usage_exit 0 ;;
+    *) usage_exit ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 # Check options validity

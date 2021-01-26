@@ -54,17 +54,11 @@ unset HDRSFILE
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    -r)    shift
-        [ $# -ge 1 ] || usage_exit
-        HDRSFILE="$1"
-        ;;
-    --help)
-        usage_exit 0
-        ;;
-    *) usage_exit
-        ;;
+    -r)     shift; HDRSFILE="$1" ;;
+    --help) usage_exit 0 ;;
+    *)      usage_exit ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 # Check options validity

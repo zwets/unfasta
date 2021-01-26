@@ -48,19 +48,12 @@ MARK=0
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    -m|--mark)
-        MARK=1
-        ;;
-    -b|--but)
-        BUT=1
-        ;;
-    -h|--help)
-        usage_exit 0
-        ;;
-    *) usage_exit
-        ;;
+    -m|--mark) MARK=1 ;;
+    -b|--but)  BUT=1 ;;
+    -h|--help) usage_exit 0 ;;
+    *)         usage_exit ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 # Check first argument is positive number

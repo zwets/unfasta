@@ -64,22 +64,13 @@ MARK=0
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    -r|--reverse-only)
-        COMPLEMENT=0
-        ;;
-    -c|--complement-only)
-        REVERSE=0
-        ;;
-    -m|--mark*)
-        MARK=1
-        ;;
-    --help)
-        usage_exit 0
-        ;;
-    *) usage_exit
-        ;;
+    -r|--reverse-only)    COMPLEMENT=0 ;;
+    -c|--complement-only) REVERSE=0 ;;
+    -m|--mark*)           MARK=1 ;;
+    --help)               usage_exit 0 ;;
+    *) usage_exit ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 # Do the work

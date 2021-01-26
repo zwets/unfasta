@@ -49,22 +49,13 @@ TOTALS=0
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    -b|--bare)
-        BARE=1
-        ;;
-    -l|--length*)
-        LENGTH_ONLY=1
-        ;;
-    -t|--totals)
-        TOTALS=1
-        ;;
-    -h|--help)
-        usage_exit 0
-        ;;
-    *) usage_exit
-        ;;
+    -b|--bare)    BARE=1 ;;
+    -l|--length*) LENGTH_ONLY=1 ;;
+    -t|--totals)  TOTALS=1 ;;
+    -h|--help)    usage_exit 0 ;;
+    *) usage_exit ;;
     esac
-    shift
+    shift || usage_exit
 done
 
 gawk -bO -v P="$(basename "$0")" -v BARE=$BARE -v LENGTH_ONLY=$LENGTH_ONLY -v TOTALS=$TOTALS '
