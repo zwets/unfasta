@@ -50,38 +50,15 @@ unset NTH SEQID REGEX
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    --nth=*)
-        NTH=${1#--nth=}
-        ;;
-    -n|--nth)
-        shift
-        [ $# -ge 1 ] || usage_exit
-        NTH=$1
-        ;;
-    --id=*)
-        SEQID=${1#--id=}
-        ;;
-    -i|--id)
-        shift
-        [ $# -ge 1 ] || usage_exit
-        SEQID=$1
-        ;;
-    --grep=*)
-        REGEX=${1#--grep=}
-        ;;
-    -g|--grep)
-        shift
-        [ $# -ge 1 ] || usage_exit
-        REGEX=$1
-        ;;
-    -h|--help)
-        usage_exit 0
-        ;;
-    -)
-        break
-        ;;
-    *) usage_exit
-        ;;
+    --nth=*)   NTH=${1#--nth=} ;;
+    -n|--nth)  shift; [ $# -ge 1 ] || usage_exit; NTH=$1 ;;
+    --id=*)    SEQID=${1#--id=} ;;
+    -i|--id)   shift; [ $# -ge 1 ] || usage_exit; SEQID=$1 ;;
+    --grep=*)  REGEX=${1#--grep=} ;;
+    -g|--grep) shift; [ $# -ge 1 ] || usage_exit; REGEX=$1 ;;
+    -h|--help) usage_exit 0 ;;
+    -) break ;;
+    *) usage_exit ;;
     esac
     shift
 done

@@ -38,7 +38,7 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
    -l, --lower   Write lowercase
    -u, --upper   Write uppercase
 
-  Option -r reverts sequences to classic FASTA by breaking lines at 80 chars.
+  Option -r reverts sequences to classic FASTA by breaking lines at 60 chars.
   Note however that there is no need to do this, as every unfasta file is also
   a valid FASTA file.  The 60 or 80 char limit is only a recommendation.
 
@@ -59,26 +59,17 @@ UPPER=0
 
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    -l|--lower)
-        LOWER=1
-        ;;
-    -u|--upper)
-        UPPER=1
-        ;;
-    -r|--rever*)
-        REVERT="true"
-        ;;
-    -h|--help)
-        usage_exit 0
-        ;;
-    *) usage_exit
-        ;;
+    -l|--lower)  LOWER=1 ;;
+    -u|--upper)  UPPER=1 ;;
+    -r|--rever*) REVERT="true" ;;
+    -h|--help)   usage_exit 0 ;;
+    *) usage_exit ;;
     esac
     shift
 done
 
 if [ -n "$REVERT" ]; then
-    gawk -bO -v WIDTH=80 -v L=$LOWER -v U=$UPPER '
+    gawk -bO -v WIDTH=60 -v L=$LOWER -v U=$UPPER '
     /^>/ 
     /^[^>]/ { for (i=1;i<=length();i+=WIDTH) { S=substr($0,i,WIDTH); print (L ? tolower(S) : U ? toupper(S) : S) } }' "$@"
 else
@@ -86,6 +77,6 @@ else
     /^>/    { if (NR!=1) print "\n"; print $0 "\n" }
     /^[^>]/ { gsub(/[[:space:]]/,""); print (L ? tolower($0) : U ? toupper($0) : $0) }
     END { print "\n" }' "$@"
-fi
+fi | tr -d '\r'
 
 # vim: sts=4:sw=4:et:si:ai
