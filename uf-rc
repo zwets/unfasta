@@ -27,7 +27,7 @@
 #  V  G/C/A              -  gap of indeterminate length (EXCLUDED)
 
 NUCL_ALPHABET="AaCcGgTtNnKkMmSsWwYyRrBbVvDdHh"
-COMP_ALPHABET="TtGgCcAaNnMmKkWwSsRrYyVvBbHhDd"
+COMP_ALPHABET="TtGgCcAaNnMmKkSsWwRrYyVvBbHhDd"
 
 # Function to exit this script with an error message on stderr
 err_exit() {
