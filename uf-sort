@@ -61,7 +61,7 @@ done
 # Then we sort, and then we unpack everything again.
 
 # Pre-process into single records
-gawk -bO -v OFS='\t' '
+awk -v OFS='\t' '
     NR % 2 == 1 { HDR = $0; }
     NR % 2 == 0 { print length(), $0, HDR }
     ' "$@" |
@@ -69,6 +69,6 @@ gawk -bO -v OFS='\t' '
 #LC_ALL=C sort $REVERSE --buffer-size=1G --key='1rn,2' -t '    ' - |
 LC_ALL=C sort $REVERSE --key='1rn,2' -t "$(printf '\t')" - |
 # And unpack again - let's hope there are no tabs in headers ...
-gawk -bO -F '\t' '{ print $3; print $2; }'
+awk -F '\t' '{ print $3; print $2; }'
 
 # vim: sts=4:sw=4:et:si:ai
