@@ -18,8 +18,8 @@
 #
 #  This utility is part of http://io.zwets.it/unfasta
 
-# Fail immediately on component failure in pipelines
-set -e -o pipefail
+# "Hardened bash"
+set -euo pipefail
 
 # Function to exit this script with an error message on stderr
 err_exit() {
@@ -55,16 +55,17 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
 
 # Parse options
 
-unset REVERT
+REVERT=0
 LOWER=0
 UPPER=0
 RET=0
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
+#while (( $# )) && "$(expr "$1" : '\(.\)..*')" = "-" ]; do
+while (( $# )) && [[ -z "${1%%-?*}" ]]; do
     case $1 in
     -l|--lower)  LOWER=1 ;;
     -u|--upper)  UPPER=1 ;;
-    -r|--rever*) REVERT="true" ;;
+    -r|--rever*) REVERT=1 ;;
     -h|--help)   usage_exit 0 ;;
     *) usage_exit ;;
     esac
@@ -75,7 +76,7 @@ done
 
 for F in $DASH "$@"; do
     gzip -dfc "$F" |
-    if [ -n "$REVERT" ]; then
+    if (( $REVERT )); then
         gawk -bO -v WIDTH=60 -v L=$LOWER -v U=$UPPER '
         /^>/
         /^[^>]/ { for (i=1;i<=length();i+=WIDTH) {
