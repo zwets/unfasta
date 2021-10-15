@@ -45,14 +45,15 @@ done
 
 cd "$(dirname "$0")"
 
-E='>Sequence 0
->Sequence 1
+E='>Seq_0
+
+>Seq_1
 1234
->Sequence 2
+>Seq_2
 1234
->Sequence 3
+>Seq_3
 1234
->Sequence 4
+>Seq_4
 1234'
 EE="$E
 $E"
@@ -72,13 +73,13 @@ F="faulty.fa"
 [ "$EE" = "$(cat $T | $UF - $T)" ] || err_exit "failed: test 7"
 
 # Test UF with gzipped valid input
-[ "$E" = "$($UF $Z)" ]             || err_exit "failed: test 1"
-[ "$E" = "$(cat $Z | $UF)" ]       || err_exit "failed: test 2"
-[ "$E" = "$(cat $Z | $UF -)" ]     || err_exit "failed: test 3"
-[ "$EE" = "$(cat $Z $Z | $UF)" ]   || err_exit "failed: test 4"
-[ "$EE" = "$($UF $Z $Z)" ]         || err_exit "failed: test 5"
-[ "$EE" = "$(cat $Z | $UF $Z -)" ] || err_exit "failed: test 6"
-[ "$EE" = "$(cat $Z | $UF - $Z)" ] || err_exit "failed: test 7"
+[ "$E" = "$($UF $Z)" ]             || err_exit "failed: gz test 1"
+[ "$E" = "$(cat $Z | $UF)" ]       || err_exit "failed: gz test 2"
+[ "$E" = "$(cat $Z | $UF -)" ]     || err_exit "failed: gz test 3"
+[ "$EE" = "$(cat $Z $Z | $UF)" ]   || err_exit "failed: gz test 4"
+[ "$EE" = "$($UF $Z $Z)" ]         || err_exit "failed: gz test 5"
+[ "$EE" = "$(cat $Z | $UF $Z -)" ] || err_exit "failed: gz test 6"
+[ "$EE" = "$(cat $Z | $UF - $Z)" ] || err_exit "failed: gz test 7"
 
 # Test UF with faulty input
 ! $UF $F 2>/dev/null || err_exit "failed: test 8" 

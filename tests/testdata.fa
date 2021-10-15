@@ -1,22 +1,21 @@
->Sequence 0
+>Seq_0
 
->Sequence 1
+>Seq_1
 1
-2
-3
+2 3
 
 4
->Sequence 2
+>Seq_2
 12
 34
->Sequence 3
+>Seq_3
 1
 2
 3
 
 4
 
->Sequence 4
+>Seq_4
 12  34
 
 

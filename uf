@@ -84,11 +84,11 @@ for F in $DASH "$@"; do
         } }' '-'
     else
         gawk -bO -v L=$LOWER -v U=$UPPER 'BEGIN { ORS=""; D=0; H=0 }
-        /^>/ && D { print "\n" }
-        /^>/      { print $0 "\n"; D=0; H=1 }
-        /^[^>]/ && !H { print "uf: input is not valid FASTA\n" >"/dev/stderr"; exit 1 }
-        /^[^>]/       { gsub(/[[:space:]]/,""); print (L ? tolower($0) : U ? toupper($0) : $0); D=1 }
-        END { if (D) print "\n" }' '-'
+        /^>/ && (H||D)     { print "\n" }
+        /^>/               { print $0 "\n"; D=0; H=1 }
+        /^[^>]/ && !(H||D) { print "uf: input is not valid FASTA\n" >"/dev/stderr"; exit 1 }
+        /^[^>]/            { gsub(/[[:space:]]/,""); print (L ? tolower($0) : U ? toupper($0) : $0); D=1; H=0 }
+        END { if (D||H) print "\n" }' '-'
     fi
 done | tr -d '\r'
 
