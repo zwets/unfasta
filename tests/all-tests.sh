@@ -84,4 +84,17 @@ F="faulty.fa"
 # Test UF with faulty input
 ! $UF $F 2>/dev/null || err_exit "failed: test 8" 
 
+### Test uf-select
+
+UFS="../uf-select"
+E0='>Seq_0
+'
+E2='>Seq_2
+1234'
+
+[ $($UF $T | $UFS -n 1 | wc -l) -eq 2 ]  || err_exit "failed: uf-select test 1"
+[ "$E2" = "$($UF $T | $UFS -i Seq_2)" ]  || err_exit "failed: uf-select test 2"
+[ "$E2" = "$($UF $T | $UFS -g 2)" ]      || err_exit "failed: uf-select test 3"
+[ -z "$($UF $T | $UFS -n 1 -l 1)" ]      || err_exit "failed: uf-select test 4"
+
 # vim: sts=4:sw=4:et:si:ai

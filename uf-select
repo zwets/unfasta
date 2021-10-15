@@ -27,19 +27,19 @@ err_exit() {
 # Function to show usage information and exit
 usage_exit() {
     echo "
-Usage: $(basename $0) [OPTIONS|NUMBERS|REGEX] [FILE ...]
+Usage: $(basename $0) [OPTIONS] [FILE ...]
 
   Select sequences from unfasta FILEs and write to standard output.
   If no FILE is present or when FILE is '-', read standard input.
 
   OPTIONS
-   -n, --nth N[,..]  Select the nth sequence(s) for each file.
-   -i, --id SEQID    Select the sequence(s) whose ID equals SEQID
-   -g, --grep REGEX  Select the sequence(s) whose header matches REGEX.
+   -n, --nth N[,..]  Select the nth sequence(s) for each file
+   -i, --id SEQID    Select the sequence whose ID equals SEQID
+   -g, --grep REGEX  Select sequences whose header matches REGEX
+   -l, --len MIN     Select sequences whose length is at least MIN
 
-  As a convenience, when no option is specified then if the first argument 
-  parses as a valid list of NUMBERS then --nth is assumed, else --id is
-  assumed.
+  Options -n, -i, -g are mutually exclusive.  One of -n, -i, -g, -l
+  must be specified.
 " >&2
     exit ${1:-1}
 }
@@ -47,15 +47,18 @@ Usage: $(basename $0) [OPTIONS|NUMBERS|REGEX] [FILE ...]
 # Parse options
 
 unset NTH SEQID REGEX
+MINLEN=0
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
+while [ $# -ne 0 ] && [ "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
-    --nth=*)   NTH=${1#--nth=} ;;
-    -n|--nth)  shift; NTH=$1 ;;
-    --id=*)    SEQID=${1#--id=} ;;
-    -i|--id)   shift; SEQID=$1 ;;
-    --grep=*)  REGEX=${1#--grep=} ;;
-    -g|--grep) shift; REGEX=$1 ;;
+    --nth=*)   NTH="${1#--nth=}" ;;
+    -n|--nth)  shift && NTH="$1" || usage_exit ;;
+    --id=*)    SEQID="${1#--id=}" ;;
+    -i|--id)   shift && SEQID="$1" || usage_exit ;;
+    --grep=*)  REGEX="${1#--grep=}" ;;
+    -g|--grep) shift && REGEX="$1" || usage_exit ;;
+    --len=*)   MINLEN=${1#--len=} ;;
+    -l|--len)  shift && MINLEN=$1 || usage_exit ;;
     -h|--help) usage_exit 0 ;;
     -)         break ;;
     *)         usage_exit ;;
@@ -63,22 +66,11 @@ while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     shift || usage_exit
 done
 
-# Handle option-less case
-
-if [ -z "${NTH}${SEQID}${REGEX}" ]; then
-    [ -n "$1" ] || usage_exit
-    if expr "$1" : '\([0-9]\+\(,[0-9]\+\)*$\)' >/dev/null; then
-        NTH="$1"
-    else
-        SEQID="$1"
-    fi
-    shift
-fi
-
 # Check options
 
 [ -z "$NTH" ] || [ -z "${SEQID}${REGEX}" ] || err_exit "options --nth, --id, and --grep cannot be combined"
 [ -z "$SEQID" ] || [ -z "${NTH}${REGEX}" ] || err_exit "options --nth, --id, and --grep cannot be combined"
+[ -z "$REGEX" ] || [ -z "${NTH}${SEQID}" ] || err_exit "options --nth, --id, and --grep cannot be combined"
 [ -z "$NTH" ] || expr "$NTH" : '\([0-9]\+\(,[0-9]\+\)*$\)' >/dev/null || err_exit "not a valid number list: $NTH"
 
 # Do the work
@@ -97,10 +89,14 @@ while [ -n "$FILE" ]; do
         ' "$FILE"
     elif [ -n "$REGEX" ]; then
         gawk -bO "$(printf 'NR %% 2 == 1 && /%s/ { print; getline; print }\n' "$REGEX")" "$FILE"
+    elif [ $MINLEN -ne 0 ]; then
+        cat "$FILE"
     else
         usage_exit
     fi
-    [ $# -gt 0 ] && shift && FILE="$1" || unset FILE
-done
+    [ $# -gt 0 ] && shift && FILE="$1" || FILE=""
+done | gawk -bO -v MINLEN="$MINLEN" '
+    NR%2 == 1 { H=$0 }
+    NR%2 == 0 && length() >= MINLEN { print H; print }'
 
 # vim: sts=4:sw=4:et:si:ai
