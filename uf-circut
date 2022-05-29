@@ -56,15 +56,15 @@ Usage: $(basename $0) [OPTIONS] FROM:END [FILE ...]
 
   Constraints:
   - Positions (FROM, END, MID) are 1-based; negative values count backward from
-    the rightmost element; FROM. END and MID must be on the sequence and hence
-    values must be in range 1..LENGTH or -1..-LENGTH;
+    the rightmost element.  FROM, END and MID must be on the sequence and hence
+    values must be in range 1..LENGTH or -1..-LENGTH.
   - Lengths (LEN, DIST) are positive numbers; LEN must be in range 1..LENGTH;
     DIST must be in range 0..(LENGTH-1)/2; these constraints prevent the cut
     from being longer than the sequence and 'wrapping onto itself'.
   - In the FROM:END case, when FROM is positive and END is negative, then END
-    must not resolves to a position left of FROM.  Inversely, when FROM is
+    must not resolve to a position left of FROM.  Inversely, when FROM is
     negative and END is positive then END must end up left of FROM.  In short:
-    M:-N never wraps, -M:N always wrap.  (Guarantees least surprise behaviour.)
+    M:-N never wraps, -M:N always wrap (to guarantee least surprise behaviour.)
 
   Examples, tip and tricks:
   - $(basename "$0") -10:11  Select 21 bases around pos 1 of cyclic seq
