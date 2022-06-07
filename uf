@@ -22,10 +22,7 @@
 set -euo pipefail
 
 # Function to exit this script with an error message on stderr
-err_exit() {
-    echo "$(basename "$0"): $*" >&2
-    exit 1
-}
+err_exit() { echo "$(basename "$0"): $*" >&2; exit 1; }
 
 # Function to show usage information and exit
 usage_exit() {
@@ -55,18 +52,15 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
 
 # Parse options
 
-REVERT=0
-LOWER=0
-UPPER=0
-RET=0
+REVERT=0 LOWER=0 UPPER=0 RET=0
 
 #while (( $# )) && "$(expr "$1" : '\(.\)..*')" = "-" ]; do
 while (( $# )) && [[ -z "${1%%-?*}" ]]; do
     case $1 in
-    -l|--lower)  LOWER=1 ;;
-    -u|--upper)  UPPER=1 ;;
-    -r|--rever*) REVERT=1 ;;
-    -h|--help)   usage_exit 0 ;;
+    -l|--l*)  LOWER=1 ;;
+    -u|--u*)  UPPER=1 ;;
+    -r|--r*)  REVERT=1 ;;
+    -h|--h*)  usage_exit 0 ;;
     *) usage_exit ;;
     esac
     shift || usage_exit
