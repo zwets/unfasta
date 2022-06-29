@@ -157,7 +157,7 @@ As in FASTA, an unfasta file contains a list of zero (does FASTA support this?) 
 
 #### Comply with BLAST practices
 
-Stick with the NCBI BLAST specifications for FASTA header lines, sequence identifiers and sequence data, as specified in the [NCBI BLAST specification aka "Web BLAST page options"](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml), and the [NCBI Sequence Identifier specification as hidden in the bottom drawer of a locked filing cabinet stuck in a disused lavatory with a sign of the door saying "Beware of the Leopard"](http://www.goodreads.com/quotes/40705-but-the-plans-were-on-display-on-display-i-eventually), aka ["Table 5"](http://ncbi.github.io/cxx-toolkit/pages/ch_demo#ch_demo.T5) in the Examples and Demos chapter of the NCBI C++ Toolkit Handbook.[\*\*](#footnotes).
+Stick with the NCBI BLAST specifications for FASTA header lines, sequence identifiers and sequence data, as specified in the [NCBI BLAST specification aka "Web BLAST page options"](http://blast.ncbi.nlm.nih.gov/blastcgihelp.shtml), and the [NCBI Sequence Identifier specification as hidden in the bottom drawer of a locked filing cabinet stuck in a disused lavatory with a sign on the door saying "Beware of the Leopard"](http://www.goodreads.com/quotes/40705-but-the-plans-were-on-display-on-display-i-eventually), aka ["Table 5"](http://ncbi.github.io/cxx-toolkit/pages/ch_demo#ch_demo.T5) in the Examples and Demos chapter of the NCBI C++ Toolkit Handbook.[\*\*](#footnotes).
 
 #### Requirements for filters
 
