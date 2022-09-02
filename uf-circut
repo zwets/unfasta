@@ -155,8 +155,8 @@ function validate() {
         if (abs(FROM) > N) return val_error("FROM position (" FROM ") outside sequence length (" N ")") 
         if (abs(UPTO) > N) return val_error("END position (" UPTO ") outside sequence length (" N ")")
         # Check the cases specified in the constraint for guaranteeing least surprise
-        if (FROM < 0 && UPTO > 0 && UPTO-FROM > N) return val_error("sequence too short (" N ") for wrap " FROM ":" UPTO)
-        if (FROM > 0 && UPTO < 0 && FROM-UPTO > N+1) return val_error("sequence too short (" N ") for cut " FROM ":" UPTO)
+        if (FROM < 0 && UPTO > 0 && UPTO-FROM > N) return val_error("sequence too short (" N ") for wrap -" abs(FROM) ":" UPTO)
+        if (FROM > 0 && UPTO < 0 && FROM-UPTO > N+1) return val_error("sequence too short (" N ") for cut " FROM ":-" abs(UPTO))
     } 
     else if (OP == "/") {
         if (abs(FROM) > N) return val_error("FROM position (" FROM ") outside sequence length (" N ")") 

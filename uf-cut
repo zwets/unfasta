@@ -41,6 +41,7 @@ Usage: $(basename $0) [OPTIONS] FROM:END [FILE ...]
    -q, --quiet  Do not emit messages about failed cuts.
    -z, --zero   Output a zero length sequence for a failed cut.
    -m, --mark   Document the cut by appending '(uf:cut:...)' to header.
+   --           Marks the end of the option list (needed if FROM is negative)
 
   There are three ways to specify the section:
   1. FROM:END cuts section starting at position FROM and ending at position END.
@@ -58,9 +59,7 @@ Usage: $(basename $0) [OPTIONS] FROM:END [FILE ...]
   - Unless clipping is enabled it is an error if either end of the cut interval
     lies outside of the target sequence.  If clipping is enabled then one end
     must lie in the target sequence; if the other overhangs it will be clipped.
-  - In the FROM:END case, if FROM is negative then END must be negative; but 
-    FROM may be positive and END negative (to trim both ends); in all cases,
-    if END resolves to position left of FROM, a 0-length cut results.
+  - In the FROM:END case, if FROM is negative then END must be negative.
 
   Examples, tip and tricks:
   - '$(basename "$0") 1:-1'       Selects the entire sequence
@@ -79,13 +78,14 @@ ZERO=0
 CLIP=0
 MARK=0
 
-while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
+while [ $# -ne 0 -a "$(expr -- "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
     -m|--mark)  MARK=1 ;;
     -c|--clip)  CLIP=1 ;;
     -q|--quiet) QUIET=1 ;;
     -z|--zero)  ZERO=1 ;;
     -h|--help)  usage_exit 0 ;;
+    --)         shift; break ;;
     *) usage_exit ;;
     esac
     shift || usage_exit
@@ -167,9 +167,9 @@ function validate_and_map() {
     # First handle the special (trimming) case
     if (POS0 > 0 && POS1 < 0) {
         if (POS0 > N) return val_error("leftmost position (" POS0 ") beyond end of sequence (" N ")")
-        if (abs(POS1) > N) return val_error("rightmost position (" POS1 ") before start of sequence (" -N ")")
+        if (abs(POS1) > N) return val_error("rightmost position (-" abs(POS1) ") before start of sequence (-" N ")")
         X = POS0; Y = POS1+N+1
-        if (Y < X) val_warn("warning: trim " POS0 ":" POS1 " yields zero-length sequence")
+        if (Y < X) val_warn("warning: trim " POS0 ":-" abs(POS1) " yields zero-length sequence")
     }
     else { # see POSTCONDITION, we need only check and clip
         if (POS0 > 0) # and POS1 will also be
@@ -179,10 +179,10 @@ function validate_and_map() {
                 else return val_error("rightmost position (" POS1 ") beyond end of sequence and no clipping")
             else { X = POS0; Y = POS1 }
         else # POS0 < 0
-            if (POS1 < N) return val_error("rightmost position (" POS1 ") before start if sequence (" -B ")")
-            else if (POS0 < N)
-                if (C) { X = 1; Y = POS1+N+1; val_warn("clipping cut at start of sequence (" N ")") }
-                else return val_error("leftmost position (" POS0 ") before start of sequence and no clipping")
+            if (POS1 < -N) return val_error("rightmost position (-" abs(POS1) ") before start of sequence (-" N ")")
+            else if (POS0 < -N)
+                if (C) { X = 1; Y = POS1+N+1; val_warn("clipping cut at start of sequence (-" N ")") }
+                else return val_error("leftmost position (-" abs(POS0) ") before start of sequence and no clipping")
             else { X = POS0+N+1; Y = POS1+N+1 }
     }
     return 1
