@@ -1,0 +1,82 @@
+#!/bin/sh
+#
+#  uf-to-phy - Convert unfasta to phylip format
+#  Copyright (C) 2022  Marco van Zwetselaar <io@zwets.it>
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  This utility is part of http://io.zwets.it/unfasta
+
+# Function to exit this script with an error message on stderr
+err_exit() { echo "$(basename "$0"): $*" >&2; exit 1; }
+
+# Function to show usage information and exit
+usage_exit() {
+    echo "
+Usage: $(basename $0) [OPTIONS] [FILE ...]
+
+  Converts a set of unfasta FILEs to relaxed Phylip format.  If no FILE is
+  present or FILE is '-' read from standard input.
+
+  OPTIONS
+   -h, --help  display this message
+
+  The sequence names in the output are the sequence identifiers in the input,
+  with invalid Phylip characters converted to underscore.
+
+  The program aborts on the first sequence that has a different length from
+  earlier sequences, or that has a non-unique identifier.
+
+" >&2
+    exit ${1:-1}
+}
+
+# Parse options
+
+while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
+    case $1 in
+    -h|--h*) usage_exit 0 ;;
+    *)       usage_exit ;;
+    esac
+    shift || usage_exit
+done
+
+# Do the work
+
+gawk -bO -v P="$(basename "$0")" '
+    NR % 2 == 1 {
+        OID = gensub(/^>([^ ]+).*$/, "\\1", "g", $0)
+        NID = gensub(/[()\[\];:,]/, "_", "g", OID)
+        if (IDS[NID]) {
+            print P ": duplicate identifier: " NID (OID==NID?"":" (recoded from \"" OID "\")") >"/dev/stderr"
+            ERR = 1; exit 1
+        }
+        else IDS[NID] = NID
+        if (length(NID) > PAD) PAD = length(NID)
+    }
+    NR % 2 == 0 {
+        if (LEN && length() != LEN) {
+            print P ": sequence with id \"" NID "\" has deviant length: " length() " != " LEN >"/dev/stderr"
+            ERR = 1; exit 1
+        }
+        else LEN = length()
+        SEQ[NID] = $0
+    }
+    END {
+        if (ERR) exit(1)
+        print length(IDS) " " LEN
+        for (ID in IDS) printf "%-" PAD "s %s\n", ID, SEQ[ID]
+    }' "$@"
+
+# vim: sts=4:sw=4:et:si:ai
