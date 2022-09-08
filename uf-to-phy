@@ -26,17 +26,18 @@ usage_exit() {
     echo "
 Usage: $(basename $0) [OPTIONS] [FILE ...]
 
-  Converts a set of unfasta FILEs to relaxed Phylip format.  If no FILE is
-  present or FILE is '-' read from standard input.
+  Convert one or more unfasta FILEs to relaxed Phylip format.  If no FILE
+  is present or FILE is '-' read from standard input.
 
   OPTIONS
-   -h, --help  display this message
+   -r, --recode  Convert invalid characters in the sequence ID to underscores
+   -h, --help    Display this message
 
-  The sequence names in the output are the sequence identifiers in the input,
-  with invalid Phylip characters converted to underscore.
+  The sequence names in the output are the sequence identifiers in the input.
+  Invalid characters in the identifier abort the conversion, unless option -r
+  is used to convert them to underscores.
 
-  The program aborts on the first sequence that has a different length from
-  earlier sequences, or that has a non-unique identifier.
+  The program aborts when a duplicate sequence identifier is encountered.
 
 " >&2
     exit ${1:-1}
@@ -44,8 +45,10 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
 
 # Parse options
 
+RECODE=0
 while [ $# -ne 0 -a "$(expr "$1" : '\(.\)..*')" = "-" ]; do
     case $1 in
+    -r|--r*) RECODE=1 ;;
     -h|--h*) usage_exit 0 ;;
     *)       usage_exit ;;
     esac
@@ -54,15 +57,16 @@ done
 
 # Do the work
 
-gawk -bO -v P="$(basename "$0")" '
+gawk -bO -v P="$(basename "$0")" -v R=$RECODE '
+    { SN = int((NR+1) / 2) }
     NR % 2 == 1 {
         OID = gensub(/^>([^ ]+).*$/, "\\1", "g", $0)
-        NID = gensub(/[()\[\];:,]/, "_", "g", OID)
-        if (IDS[NID]) {
+        NID = RECODE ? gensub(/[()\[\];:,]/, "_", "g", OID) : OID
+        if (CHK[NID]) {
             print P ": duplicate identifier: " NID (OID==NID?"":" (recoded from \"" OID "\")") >"/dev/stderr"
             ERR = 1; exit 1
         }
-        else IDS[NID] = NID
+        else { IDS[SN] = NID; CHK[NID] = 1 }
         if (length(NID) > PAD) PAD = length(NID)
     }
     NR % 2 == 0 {
@@ -71,12 +75,12 @@ gawk -bO -v P="$(basename "$0")" '
             ERR = 1; exit 1
         }
         else LEN = length()
-        SEQ[NID] = $0
+        SEQ[SN] = $0
     }
     END {
         if (ERR) exit(1)
-        print length(IDS) " " LEN
-        for (ID in IDS) printf "%-" PAD "s %s\n", ID, SEQ[ID]
+        print length(CHK) " " LEN
+        for (SN=1; SN<=length(IDS); ++SN) printf "%-" PAD "s %s\n", IDS[SN], SEQ[SN]
     }' "$@"
 
 # vim: sts=4:sw=4:et:si:ai
