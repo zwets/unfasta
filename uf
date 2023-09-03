@@ -34,11 +34,12 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
   read standard input.  Unfasta is FASTA without the pesky line breaks.
 
   OPTIONS
-   -r, --revert  Revert unfasta to FASTA (see below)
-   -l, --lower   Write lowercase
-   -u, --upper   Write uppercase
+   -r, --revert   Revert unfasta to FASTA (see below)
+   -w, --width=W  Revert unfasta to FASTA with line length W (see below)
+   -l, --lower    Write lowercase
+   -u, --upper    Write uppercase
 
-  Option -r reverts sequences to classic FASTA by breaking lines at 60 chars.
+  Option -r reverts sequences to classic FASTA by breaking lines at W chars.
   Note though that there is no need to do this, as every unfasta file is also
   a valid FASTA file.  The 60 character line length is only a recommendation.
 
@@ -52,7 +53,7 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
 
 # Parse options
 
-REVERT=0 LOWER=0 UPPER=0 RET=0
+REVERT=0 WIDTH=60 LOWER=0 UPPER=0 RET=0
 
 #while (( $# )) && "$(expr "$1" : '\(.\)..*')" = "-" ]; do
 while (( $# )) && [[ -z "${1%%-?*}" ]]; do
@@ -60,6 +61,8 @@ while (( $# )) && [[ -z "${1%%-?*}" ]]; do
     -l|--l*)  LOWER=1 ;;
     -u|--u*)  UPPER=1 ;;
     -r|--r*)  REVERT=1 ;;
+    --w*=*)   WIDTH=${1##*=}; REVERT=1 ;;
+    -w|--w*)  shift && WIDTH=$1; REVERT=1 ;;
     -h|--h*)  usage_exit 0 ;;
     *) usage_exit ;;
     esac
@@ -71,7 +74,7 @@ done
 for F in $DASH "$@"; do
     gzip -dfc "$F" |
     if (( $REVERT )); then
-        gawk -bO -v WIDTH=60 -v L=$LOWER -v U=$UPPER '
+        gawk -bO -v WIDTH=$WIDTH -v L=$LOWER -v U=$UPPER '
         /^>/
         /^[^>]/ { for (i=1;i<=length();i+=WIDTH) {
            S=substr($0,i,WIDTH); print (L ? tolower(S) : U ? toupper(S) : S)
