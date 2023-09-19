@@ -39,12 +39,13 @@ Usage: $(basename $0) [OPTIONS] [FILE ...]
    -l, --lower    Write lowercase
    -u, --upper    Write uppercase
 
-  Option -r reverts sequences to classic FASTA by breaking lines at W chars.
-  Note though that there is no need to do this, as every unfasta file is also
-  a valid FASTA file.  The 60 character line length is only a recommendation.
-
   Apart from checking that every sequence is preceded by a header, uf performs
   no validation of the input data.  See uf-valid.
+
+  Options -r and -w revert sequences to classic FASTA by breaking lines at W
+  (default 60) characters.  Note though that strictly there is no need to do
+  this, as every unfasta file is also a valid FASTA file.  The 60 char line
+  length is a recommendation, not a requirement.
 
   More information about the unfasta suite at http://io.zwets.it/unfasta.
 " >&2
